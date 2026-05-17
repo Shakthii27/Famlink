@@ -1,0 +1,2604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FamLink — Find Your Family</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ===== CSS VARIABLES ===== */
+:root {
+  --cream: #F9F4EE;
+  --warm-white: #FDF9F5;
+  --blush: #E8C4B0;
+  --terracotta: #C47A5A;
+  --rust: #9B4D2E;
+  --deep: #2C1810;
+  --charcoal: #3D2B1F;
+  --sage: #7A9E7E;
+  --muted-sage: #A8C5AC;
+  --gold: #C9A96E;
+  --light-gold: #E8D5B0;
+  --sky: #8BB4C8;
+  --bg: #F7F0E8;
+  --card-bg: #FDFAF6;
+  --border: rgba(196,122,90,0.2);
+  --shadow: 0 8px 40px rgba(44,24,16,0.08);
+  --shadow-lg: 0 20px 60px rgba(44,24,16,0.12);
+  --radius: 16px;
+  --radius-sm: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--charcoal);
+  overflow-x: hidden;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--blush); border-radius: 3px; }
+
+/* ===== VIEWS ===== */
+.view { display: none; min-height: 100vh; }
+.view.active { display: block; }
+
+/* ===== NAV ===== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  background: rgba(249,244,238,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  height: 72px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--rust);
+  cursor: pointer;
+  letter-spacing: -0.5px;
+}
+.nav-logo span { color: var(--gold); font-style: italic; }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a {
+  font-size: 14px; font-weight: 500; color: var(--charcoal);
+  text-decoration: none; cursor: pointer; transition: color 0.2s;
+  opacity: 0.75;
+}
+.nav-links a:hover { color: var(--rust); opacity: 1; }
+.nav-actions { display: flex; gap: 12px; align-items: center; }
+.btn-ghost {
+  padding: 10px 20px; border-radius: 40px;
+  border: 1.5px solid var(--terracotta);
+  background: transparent; color: var(--terracotta);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-ghost:hover { background: var(--terracotta); color: white; }
+.btn-primary {
+  padding: 10px 24px; border-radius: 40px;
+  background: var(--rust); color: white; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--deep); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(155,77,46,0.3); }
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 120px 80px 80px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 80% 20%, rgba(232,196,176,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 10% 80%, rgba(168,197,172,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 60% 70%, rgba(201,169,110,0.15) 0%, transparent 50%);
+  background-color: var(--bg);
+}
+.hero-content { position: relative; z-index: 1; max-width: 680px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(201,169,110,0.15); border: 1px solid rgba(201,169,110,0.4);
+  border-radius: 40px; padding: 6px 16px;
+  font-size: 12px; font-weight: 600; color: var(--gold);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 28px;
+}
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(52px, 6vw, 88px);
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--deep);
+  margin-bottom: 24px;
+}
+.hero h1 em {
+  font-style: italic; color: var(--terracotta);
+  font-weight: 400;
+}
+.hero p {
+  font-size: 18px; line-height: 1.7; color: var(--charcoal);
+  opacity: 0.75; max-width: 520px; margin-bottom: 44px;
+}
+.hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn-hero {
+  padding: 16px 36px; border-radius: 50px;
+  background: var(--rust); color: white; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500;
+  cursor: pointer; transition: all 0.3s;
+  box-shadow: 0 8px 30px rgba(155,77,46,0.3);
+}
+.btn-hero:hover { background: var(--deep); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(155,77,46,0.4); }
+.btn-hero-outline {
+  padding: 16px 36px; border-radius: 50px;
+  background: transparent; color: var(--rust); border: 2px solid var(--terracotta);
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-hero-outline:hover { background: var(--blush); transform: translateY(-2px); }
+
+.hero-stats {
+  display: flex; gap: 48px; margin-top: 64px; padding-top: 48px;
+  border-top: 1px solid var(--border);
+}
+.stat-item h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px; font-weight: 600; color: var(--rust);
+}
+.stat-item p { font-size: 13px; color: var(--charcoal); opacity: 0.6; margin-top: 2px; }
+
+.hero-image-float {
+  position: absolute; right: 60px; top: 50%; transform: translateY(-50%);
+  width: 420px; height: 520px;
+  background: linear-gradient(135deg, var(--blush) 0%, var(--terracotta) 100%);
+  border-radius: 200px 200px 160px 160px;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.12; font-size: 180px;
+  overflow: hidden;
+}
+
+/* ===== SECTIONS ===== */
+.section { padding: 100px 80px; }
+.section-label {
+  font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(36px, 4vw, 56px); font-weight: 300; line-height: 1.15;
+  color: var(--deep); margin-bottom: 20px;
+}
+.section-title em { font-style: italic; color: var(--terracotta); font-weight: 400; }
+.section-sub { font-size: 16px; line-height: 1.7; color: var(--charcoal); opacity: 0.65; max-width: 560px; }
+
+/* ===== FEATURES ===== */
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 64px;
+}
+.feature-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 36px 32px; border: 1px solid var(--border);
+  transition: all 0.3s; position: relative; overflow: hidden;
+}
+.feature-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--terracotta), var(--gold));
+  opacity: 0; transition: opacity 0.3s;
+}
+.feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.feature-card:hover::before { opacity: 1; }
+.feature-icon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--blush), var(--terracotta));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin-bottom: 20px;
+}
+.feature-card h3 {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600;
+  color: var(--deep); margin-bottom: 10px;
+}
+.feature-card p { font-size: 14px; line-height: 1.7; opacity: 0.65; }
+
+/* ===== PROCESS STEPS ===== */
+.process-steps {
+  display: flex; gap: 0; margin-top: 64px; position: relative;
+}
+.process-steps::before {
+  content: ''; position: absolute; top: 32px; left: 64px; right: 64px; height: 1px;
+  background: linear-gradient(90deg, var(--blush), var(--terracotta), var(--gold));
+  z-index: 0;
+}
+.step {
+  flex: 1; text-align: center; padding: 0 20px; position: relative; z-index: 1;
+}
+.step-num {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--rust); color: white;
+  font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px; border: 4px solid var(--bg);
+}
+.step h4 {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600;
+  color: var(--deep); margin-bottom: 8px;
+}
+.step p { font-size: 13px; opacity: 0.65; line-height: 1.6; }
+
+/* ===== CHILDREN BROWSE ===== */
+.children-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px; margin-top: 48px;
+}
+.child-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  border: 1px solid var(--border); overflow: hidden;
+  transition: all 0.3s; cursor: pointer;
+}
+.child-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+.child-avatar {
+  height: 200px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 72px; position: relative;
+  overflow: hidden;
+}
+.child-card-body { padding: 24px; }
+.child-name {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600;
+  color: var(--deep); margin-bottom: 4px;
+}
+.child-meta { font-size: 13px; opacity: 0.55; margin-bottom: 16px; }
+.child-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.tag {
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  background: rgba(196,122,90,0.1); color: var(--terracotta);
+  border: 1px solid rgba(196,122,90,0.2);
+}
+.tag.sage { background: rgba(122,158,126,0.1); color: var(--sage); border-color: rgba(122,158,126,0.2); }
+.tag.sky { background: rgba(139,180,200,0.1); color: var(--sky); border-color: rgba(139,180,200,0.2); }
+.compatibility-bar {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.compatibility-bar span { font-size: 12px; opacity: 0.6; white-space: nowrap; }
+.bar-track {
+  flex: 1; height: 6px; background: rgba(196,122,90,0.15); border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--terracotta), var(--gold));
+  transition: width 1s ease;
+}
+.btn-view {
+  width: 100%; padding: 12px; border-radius: 10px;
+  background: transparent; border: 1.5px solid var(--terracotta);
+  color: var(--terracotta); font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.btn-view:hover { background: var(--rust); color: white; border-color: var(--rust); }
+
+/* ===== FILTERS ===== */
+.filters {
+  display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 32px;
+}
+.filter-btn {
+  padding: 8px 20px; border-radius: 30px; border: 1.5px solid var(--border);
+  background: var(--card-bg); color: var(--charcoal); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.filter-btn:hover, .filter-btn.active {
+  background: var(--rust); color: white; border-color: var(--rust);
+}
+.search-bar {
+  display: flex; gap: 12px; margin-bottom: 24px;
+}
+.search-input {
+  flex: 1; padding: 14px 20px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--card-bg);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal);
+  outline: none; transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--terracotta); }
+.search-input::placeholder { opacity: 0.4; }
+
+/* ===== DASHBOARD ===== */
+.dashboard-layout {
+  display: grid; grid-template-columns: 260px 1fr; min-height: 100vh;
+  padding-top: 72px;
+}
+.sidebar {
+  background: var(--card-bg); border-right: 1px solid var(--border);
+  padding: 32px 24px; position: sticky; top: 72px; height: calc(100vh - 72px);
+  overflow-y: auto;
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 32px;
+  padding-bottom: 24px; border-bottom: 1px solid var(--border);
+}
+.user-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blush), var(--terracotta));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.user-info h4 { font-size: 14px; font-weight: 600; color: var(--deep); }
+.user-info p { font-size: 12px; opacity: 0.55; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
+.sidebar-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 10px; cursor: pointer;
+  font-size: 14px; font-weight: 500; color: var(--charcoal);
+  opacity: 0.7; transition: all 0.2s; border: none; background: none;
+  text-align: left; width: 100%;
+}
+.sidebar-item:hover { background: rgba(196,122,90,0.08); opacity: 1; color: var(--rust); }
+.sidebar-item.active { background: rgba(196,122,90,0.12); color: var(--rust); opacity: 1; font-weight: 600; }
+.sidebar-item .icon { font-size: 18px; width: 24px; text-align: center; }
+
+.dashboard-main { padding: 40px 48px; background: var(--bg); }
+.dash-header { margin-bottom: 40px; }
+.dash-header h2 {
+  font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 400;
+  color: var(--deep);
+}
+.dash-header p { font-size: 15px; opacity: 0.6; margin-top: 4px; }
+
+.dash-cards {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px;
+}
+.dash-card {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 24px; border: 1px solid var(--border);
+}
+.dash-card .number {
+  font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600;
+  color: var(--rust); line-height: 1;
+}
+.dash-card .label { font-size: 13px; opacity: 0.6; margin-top: 6px; }
+.dash-card .trend { font-size: 12px; color: var(--sage); margin-top: 8px; font-weight: 500; }
+
+.dash-section-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 600;
+  color: var(--deep); margin-bottom: 20px;
+}
+
+/* ===== APPLICATION TRACKER ===== */
+.app-list { display: flex; flex-direction: column; gap: 16px; }
+.app-item {
+  background: var(--card-bg); border-radius: var(--radius);
+  padding: 24px; border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 24px;
+}
+.app-child-avatar {
+  width: 52px; height: 52px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.app-info { flex: 1; }
+.app-info h4 { font-size: 16px; font-weight: 600; color: var(--deep); margin-bottom: 4px; }
+.app-info p { font-size: 13px; opacity: 0.6; }
+.app-status {
+  padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.status-pending { background: rgba(201,169,110,0.15); color: var(--gold); }
+.status-approved { background: rgba(122,158,126,0.15); color: var(--sage); }
+.status-review { background: rgba(139,180,200,0.15); color: var(--sky); }
+.status-rejected { background: rgba(155,77,46,0.1); color: var(--rust); }
+
+/* ===== PROGRESS TRACKER ===== */
+.progress-track {
+  display: flex; gap: 0; margin: 24px 0;
+}
+.prog-step {
+  flex: 1; text-align: center; position: relative;
+}
+.prog-step::after {
+  content: ''; position: absolute; top: 16px; left: 50%; right: -50%;
+  height: 2px; background: var(--border); z-index: 0;
+}
+.prog-step:last-child::after { display: none; }
+.prog-dot {
+  width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border);
+  background: var(--card-bg); margin: 0 auto 8px; position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.prog-dot.done { background: var(--sage); border-color: var(--sage); color: white; }
+.prog-dot.active { background: var(--rust); border-color: var(--rust); color: white; }
+.prog-label { font-size: 11px; opacity: 0.6; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(44,24,16,0.5); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.modal {
+  background: var(--warm-white); border-radius: 24px;
+  max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 40px 100px rgba(44,24,16,0.2);
+}
+.modal-header {
+  padding: 32px 32px 0; display: flex; justify-content: space-between; align-items: flex-start;
+}
+.modal-header h2 {
+  font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; color: var(--deep);
+}
+.modal-close {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border);
+  background: none; font-size: 18px; cursor: pointer; color: var(--charcoal);
+  display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.modal-close:hover { background: var(--rust); color: white; }
+.modal-body { padding: 24px 32px 32px; }
+.modal-avatar {
+  width: 100px; height: 100px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 52px;
+  margin: 0 auto 24px;
+}
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+.info-item label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.5; }
+.info-item p { font-size: 15px; font-weight: 500; color: var(--deep); margin-top: 2px; }
+.modal-section-title {
+  font-size: 13px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  opacity: 0.5; margin: 24px 0 10px;
+}
+.long-text { font-size: 14px; line-height: 1.8; opacity: 0.75; }
+
+/* ===== FORM ===== */
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; opacity: 0.75; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 14px 16px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--card-bg);
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--charcoal);
+  outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--terracotta); }
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400;
+  color: var(--deep); margin-bottom: 6px;
+}
+.form-sub { font-size: 14px; opacity: 0.6; margin-bottom: 28px; }
+.btn-submit {
+  width: 100%; padding: 16px; border-radius: 12px;
+  background: var(--rust); color: white; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; margin-top: 8px;
+}
+.btn-submit:hover { background: var(--deep); transform: translateY(-1px); }
+
+/* ===== LOGIN ===== */
+.auth-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 100px 24px 40px;
+  background: radial-gradient(ellipse 80% 80% at 50% 0%, rgba(232,196,176,0.3) 0%, transparent 60%),
+              var(--bg);
+}
+.auth-card {
+  background: var(--card-bg); border-radius: 24px; padding: 48px;
+  width: 100%; max-width: 460px; border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+}
+.auth-logo {
+  text-align: center; margin-bottom: 36px;
+  font-family: 'Cormorant Garamond', serif; font-size: 36px;
+  font-weight: 600; color: var(--rust);
+}
+.auth-logo span { color: var(--gold); font-style: italic; }
+.auth-tabs {
+  display: flex; gap: 0; margin-bottom: 32px;
+  border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border);
+}
+.auth-tab {
+  flex: 1; padding: 12px; text-align: center; cursor: pointer;
+  font-size: 14px; font-weight: 500; color: var(--charcoal);
+  background: transparent; border: none; transition: all 0.2s; opacity: 0.6;
+}
+.auth-tab.active { background: var(--rust); color: white; opacity: 1; }
+.role-select {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px;
+}
+.role-option {
+  padding: 16px 12px; border-radius: 12px; border: 1.5px solid var(--border);
+  text-align: center; cursor: pointer; transition: all 0.2s; background: var(--card-bg);
+}
+.role-option.selected { border-color: var(--terracotta); background: rgba(196,122,90,0.06); }
+.role-option .role-icon { font-size: 28px; margin-bottom: 6px; }
+.role-option .role-name { font-size: 13px; font-weight: 500; color: var(--charcoal); }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+  background: var(--deep); color: white; padding: 16px 24px;
+  border-radius: 12px; font-size: 14px; max-width: 320px;
+  box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease;
+  display: flex; align-items: center; gap: 12px;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeInUp 0.6s ease forwards; }
+.fade-in-2 { animation: fadeInUp 0.6s 0.15s ease both; }
+.fade-in-3 { animation: fadeInUp 0.6s 0.3s ease both; }
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--deep); color: rgba(255,255,255,0.7);
+  padding: 60px 80px 40px;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand .logo {
+  font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600;
+  color: white; margin-bottom: 12px;
+}
+.footer-brand .logo span { color: var(--gold); font-style: italic; }
+.footer-brand p { font-size: 14px; line-height: 1.7; opacity: 0.6; max-width: 300px; }
+.footer-col h4 { color: white; font-size: 13px; font-weight: 600; margin-bottom: 16px; letter-spacing: 1px; text-transform: uppercase; }
+.footer-col a { display: block; font-size: 14px; margin-bottom: 10px; opacity: 0.55; cursor: pointer; transition: opacity 0.2s; }
+.footer-col a:hover { opacity: 1; }
+.footer-bottom {
+  padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.footer-bottom p { font-size: 13px; opacity: 0.4; }
+
+/* ===== CHILD DETAIL PAGE ===== */
+.child-detail {
+  padding: 100px 80px 80px;
+  display: grid; grid-template-columns: 1fr 380px; gap: 48px;
+}
+.child-detail-avatar {
+  height: 280px; border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 120px; margin-bottom: 32px;
+}
+.detail-section { margin-bottom: 36px; }
+.detail-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 10px; }
+
+.sticky-card {
+  position: sticky; top: 100px; background: var(--card-bg);
+  border-radius: 24px; padding: 32px; border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* ===== COUNSELOR NOTES ===== */
+.note-card {
+  background: linear-gradient(135deg, rgba(232,196,176,0.15), rgba(201,169,110,0.1));
+  border-radius: 12px; padding: 20px; border: 1px solid rgba(201,169,110,0.2);
+  margin-bottom: 12px;
+}
+.note-author { font-size: 12px; font-weight: 600; color: var(--gold); margin-bottom: 6px; }
+.note-text { font-size: 14px; line-height: 1.7; opacity: 0.8; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .hero { padding: 120px 40px 80px; }
+  .hero-image-float { display: none; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .section { padding: 80px 40px; }
+  .dash-cards { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  .hero { padding: 100px 24px 60px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .section { padding: 60px 24px; }
+  .process-steps { flex-direction: column; }
+  .process-steps::before { display: none; }
+  .dashboard-layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .child-detail { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+  footer { padding: 60px 24px 40px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .dash-cards { grid-template-columns: 1fr 1fr; }
+}
+
+.hidden { display: none !important; }
+
+/* Notification badge */
+.badge {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--rust); color: white; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; margin-left: auto;
+}
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 32px 0; }
+
+/* Empty state */
+.empty-state {
+  text-align: center; padding: 60px 24px; opacity: 0.5;
+}
+.empty-state .icon { font-size: 52px; margin-bottom: 16px; }
+.empty-state p { font-size: 16px; }
+
+/* Two-column layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.two-col.reverse { direction: rtl; }
+.two-col.reverse > * { direction: ltr; }
+
+/* Testimonial */
+.testimonials { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+.testimonial-card {
+  background: var(--card-bg); border-radius: var(--radius); padding: 32px;
+  border: 1px solid var(--border);
+}
+.testimonial-card .quote {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic;
+  line-height: 1.6; color: var(--deep); margin-bottom: 20px;
+}
+.testimonial-author { display: flex; align-items: center; gap: 12px; }
+.t-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--blush), var(--terracotta));
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.t-name { font-size: 14px; font-weight: 600; color: var(--deep); }
+.t-sub { font-size: 12px; opacity: 0.55; }
+
+.notification-dot {
+  width: 8px; height: 8px; background: var(--rust); border-radius: 50%;
+  display: inline-block; margin-left: 6px;
+}
+
+/* Table */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th {
+  text-align: left; padding: 12px 16px;
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  opacity: 0.5; border-bottom: 1px solid var(--border);
+}
+.data-table td { padding: 16px; border-bottom: 1px solid rgba(196,122,90,0.08); font-size: 14px; }
+.data-table tr:hover td { background: rgba(196,122,90,0.04); }
+
+/* ===== CHATBOT ===== */
+#chatbot-btn {
+  position: fixed; bottom: 60px; right: 24px; z-index: 1500;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--rust); color: white; border: none;
+  font-size: 24px; cursor: pointer; box-shadow: 0 8px 24px rgba(155,77,46,0.4);
+  transition: all 0.3s; display: flex; align-items: center; justify-content: center;
+}
+#chatbot-btn:hover { background: var(--deep); transform: scale(1.08); }
+#chatbot-window {
+  position: fixed; bottom: 126px; right: 24px; z-index: 1500;
+  width: 360px; max-height: 520px; border-radius: 20px;
+  background: var(--warm-white); border: 1px solid var(--border);
+  box-shadow: 0 24px 64px rgba(44,24,16,0.18);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: fadeInUp 0.3s ease;
+}
+#chatbot-window.hidden { display: none !important; }
+.chatbot-header {
+  padding: 16px 20px; background: var(--rust); color: white;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.chatbot-header h4 { font-family: 'Cormorant Garamond',serif; font-size: 18px; font-weight: 600; }
+.chatbot-header p { font-size: 11px; opacity: 0.75; margin-top: 1px; }
+.chatbot-close { background: none; border: none; color: white; font-size: 18px; cursor: pointer; opacity: 0.8; }
+.chatbot-close:hover { opacity: 1; }
+#chatbot-messages {
+  flex: 1; overflow-y: auto; padding: 16px; display: flex;
+  flex-direction: column; gap: 10px; min-height: 260px;
+}
+.cb-msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.6; }
+.cb-msg.bot { background: rgba(196,122,90,0.1); color: var(--charcoal); align-self: flex-start; border-bottom-left-radius: 4px; }
+.cb-msg.user { background: var(--rust); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.cb-msg.typing { opacity: 0.6; }
+.chatbot-input-row { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); background: var(--card-bg); }
+.chatbot-input-row input {
+  flex: 1; padding: 10px 14px; border-radius: 10px;
+  border: 1.5px solid var(--border); background: var(--warm-white);
+  font-family: 'DM Sans',sans-serif; font-size: 13px; color: var(--charcoal); outline: none;
+}
+.chatbot-input-row input:focus { border-color: var(--terracotta); }
+.chatbot-input-row button {
+  padding: 10px 16px; border-radius: 10px; background: var(--rust);
+  color: white; border: none; cursor: pointer; font-size: 16px; transition: background 0.2s;
+}
+.chatbot-input-row button:hover { background: var(--deep); }
+</style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav id="main-nav">
+  <div class="nav-logo" onclick="showView('landing')">Fam<span>Link</span></div>
+  <div class="nav-links">
+    <a onclick="showView('browse')">Browse Children</a>
+    <a onclick="showView('landing'); setTimeout(()=>scrollTo({top:document.getElementById('how').offsetTop,behavior:'smooth'}),100)">How It Works</a>
+    <a onclick="showView('landing'); setTimeout(()=>scrollTo({top:document.getElementById('about').offsetTop,behavior:'smooth'}),100)">About</a>
+  </div>
+  <div class="nav-actions" id="nav-actions">
+    <button class="btn-ghost" onclick="showView('login')">Sign In</button>
+    <button class="btn-primary" onclick="showView('register')">Get Started</button>
+  </div>
+</nav>
+
+<!-- ============================== LANDING VIEW ============================== -->
+<div id="view-landing" class="view active">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge fade-in">🌸 Ethical Adoption Platform</div>
+      <h1 class="fade-in-2">
+        Every child deserves<br>a family they <em>belong</em> to
+      </h1>
+      <p class="fade-in-3">FamLink connects children with families through emotional compatibility — not just age or availability. Built on care, transparency, and compassion.</p>
+      <div class="hero-ctas fade-in-3">
+        <button class="btn-hero" onclick="showView('register')">Begin Your Journey</button>
+        <button class="btn-hero-outline" onclick="showView('browse')">Browse Profiles</button>
+      </div>
+      <div class="hero-stats fade-in-3">
+        <div class="stat-item"><h3>2,400+</h3><p>Children in our care</p></div>
+        <div class="stat-item"><h3>1,180+</h3><p>Successful adoptions</p></div>
+        <div class="stat-item"><h3>340+</h3><p>Partner agencies</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" style="background:var(--warm-white)">
+    <p class="section-label">Why FamLink</p>
+    <h2 class="section-title">A platform built with<br><em>heart and purpose</em></h2>
+    <p class="section-sub">We go beyond basic matching — we understand personalities, values, and emotional needs to create lasting family bonds.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💫</div>
+        <h3>Emotional Matching</h3>
+        <p>Our intelligent compatibility system aligns children's interests, personalities, and aspirations with parent values and lifestyle — reducing age-based bias.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Secure & Private</h3>
+        <p>Role-based access control ensures that child information is only visible to authorized parties. No direct contact without agency approval.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>Full Process Tracking</h3>
+        <p>Track your application through every stage — from submission and background checks to counselling sessions and final approval.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Counselor Insights</h3>
+        <p>Psychologists and social workers document each child's emotional needs, trauma history, and behavioral notes to help parents prepare.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Educational Resources</h3>
+        <p>Access expert-curated guides on bonding with older children, understanding trauma, and navigating the emotional journey of adoption.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌱</div>
+        <h3>Post-Adoption Support</h3>
+        <p>Our follow-up program monitors child wellbeing during the transition phase, offering ongoing counsellor access and parent support.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section" id="how">
+    <p class="section-label">The Process</p>
+    <h2 class="section-title">Your adoption journey,<br><em>step by step</em></h2>
+    <p class="section-sub">A transparent, supported process from your first profile to welcoming a child home.</p>
+    <div class="process-steps" style="margin-top:72px">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Create Profile</h4>
+        <p>Share your lifestyle, values, and parenting preferences to build your family profile.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Home Study</h4>
+        <p>A counselor visits and evaluates your home environment. HCR is prepared and reviewed.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Browse & Match</h4>
+        <p>Explore child profiles and receive compatibility suggestions based on shared values.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>Apply</h4>
+        <p>Submit your adoption application with all required legal documentation.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <h4>Counselling</h4>
+        <p>Attend mandatory counselling sessions to prepare emotionally for adoption.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <h4>Welcome Home</h4>
+        <p>Agency approves the match. Your new family chapter begins with our ongoing support.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="section" style="background:var(--warm-white)" id="about">
+    <p class="section-label">Stories</p>
+    <h2 class="section-title">Families made whole<br>through <em>FamLink</em></h2>
+    <div class="testimonials">
+      <div class="testimonial-card">
+        <p class="quote">"We were matched with our daughter based on our shared love of art and music. The compatibility score was 94% — and it showed. She fit right in."</p>
+        <div class="testimonial-author">
+          <div class="t-avatar">👩</div>
+          <div><p class="t-name">Priya & Arun Sharma</p><p class="t-sub">Adopted Meera, age 9</p></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <p class="quote">"The counselor notes helped us understand what Rajan had been through. We were so much better prepared, and it made those first weeks so much smoother."</p>
+        <div class="testimonial-author">
+          <div class="t-avatar">👨</div>
+          <div><p class="t-name">Thomas & Leela John</p><p class="t-sub">Adopted Rajan, age 12</p></div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <p class="quote">"The application tracking feature gave us so much peace of mind. We always knew exactly where we were in the process — no guessing, no anxiety spirals."</p>
+        <div class="testimonial-author">
+          <div class="t-avatar">👩</div>
+          <div><p class="t-name">Nandini Krishnamurthy</p><p class="t-sub">Adopted Divya, age 7</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="section" style="text-align:center; background:linear-gradient(135deg, var(--rust), var(--deep)); padding:80px;">
+    <p style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;">Ready to begin?</p>
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(36px,4vw,60px);font-weight:300;color:white;margin-bottom:20px;">A child is waiting for<br><em style="font-style:italic;color:var(--blush)">exactly</em> who you are</h2>
+    <p style="font-size:17px;color:rgba(255,255,255,0.65);margin-bottom:44px;max-width:480px;margin-left:auto;margin-right:auto;">Start your profile today and take the first step toward building your family.</p>
+    <button class="btn-hero" onclick="showView('register')" style="background:white;color:var(--rust);">Create Your Profile</button>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo">Fam<span>Link</span></div>
+        <p>A compassionate child adoption platform connecting hearts and building families through emotional compatibility, transparency, and care.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <a onclick="showView('browse')">Browse Children</a>
+        <a onclick="showView('login')">Parent Login</a>
+        <a onclick="showView('login')">Agency Portal</a>
+        <a onclick="showView('login')">Counselor Access</a>
+      </div>
+      <div class="footer-col">
+        <h4>Learn</h4>
+        <a>Adoption Guide</a>
+        <a>Legal Process</a>
+        <a>Child Welfare</a>
+        <a>FAQs</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a>Privacy Policy</a>
+        <a>Terms of Use</a>
+        <a>Data Protection</a>
+        <a>Child Safety</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 FamLink. All rights reserved. Operated under child welfare guidelines.</p>
+      <p>Made with ♥ by Joan, Jaya & Shakthi</p>
+    </div>
+  </footer>
+</div>
+
+<!-- ============================== BROWSE VIEW ============================== -->
+<div id="view-browse" class="view">
+  <div style="padding:100px 80px 80px; max-width:1400px; margin:0 auto;">
+    <div style="margin-bottom:40px;">
+      <p class="section-label">Children Awaiting Families</p>
+      <h2 class="section-title" style="margin-bottom:12px;">Browse <em>profiles</em></h2>
+      <p style="font-size:15px;opacity:0.6;">Each child is unique. Explore profiles to find your emotional match.</p>
+    </div>
+    <div class="search-bar">
+      <input class="search-input" type="text" id="search-input" placeholder="Search by name, interest, or age group..." oninput="filterChildren()"/>
+    </div>
+    <div class="filters" id="filter-btns">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All Children</button>
+      <button class="filter-btn" onclick="setFilter('toddler',this)">Toddlers (1-4)</button>
+      <button class="filter-btn" onclick="setFilter('child',this)">Children (5-10)</button>
+      <button class="filter-btn" onclick="setFilter('preteen',this)">Pre-teens (11-13)</button>
+      <button class="filter-btn" onclick="setFilter('teen',this)">Teens (14+)</button>
+      <button class="filter-btn" onclick="setFilter('legal',this)">Legally Free</button>
+    </div>
+    <div class="children-grid" id="children-grid"></div>
+  </div>
+</div>
+
+<!-- ============================== LOGIN VIEW ============================== -->
+<div id="view-login" class="view">
+  <div class="auth-page">
+    <div class="auth-card">
+      <div class="auth-logo">Fam<span>Link</span></div>
+      <p style="text-align:center;font-size:15px;opacity:0.6;margin-bottom:28px;">Welcome back. Sign in to continue.</p>
+      <div class="role-select" id="login-role-select">
+        <div class="role-option selected" onclick="selectLoginRole('parent',this)">
+          <div class="role-icon">👨‍👩‍👧</div>
+          <div class="role-name">Parent</div>
+        </div>
+        <div class="role-option" onclick="selectLoginRole('agency',this)">
+          <div class="role-icon">🏢</div>
+          <div class="role-name">Agency</div>
+        </div>
+        <div class="role-option" onclick="selectLoginRole('counselor',this)">
+          <div class="role-icon">🧑‍⚕️</div>
+          <div class="role-name">Counselor</div>
+        </div>
+        <div class="role-option" onclick="selectLoginRole('admin',this)">
+          <div class="role-icon">⚙️</div>
+          <div class="role-name">Admin</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••"/>
+      </div>
+      <button class="btn-submit" onclick="doLogin()">Sign In</button>
+      <p style="text-align:center;margin-top:20px;font-size:14px;opacity:0.6;">
+        Don't have an account? <a onclick="showView('register')" style="color:var(--rust);cursor:pointer;font-weight:500;">Register here</a>
+      </p>
+      <p style="text-align:center;margin-top:12px;font-size:13px;opacity:0.5;">
+        <a onclick="showView('landing')" style="cursor:pointer;">← Back to home</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== REGISTER VIEW ============================== -->
+<div id="view-register" class="view">
+  <div class="auth-page" style="align-items:flex-start;padding-top:100px;">
+    <div class="auth-card" style="max-width:600px;">
+      <div class="auth-logo">Fam<span>Link</span></div>
+      <p class="form-title" style="text-align:center">Create your account</p>
+      <p class="form-sub" style="text-align:center">Begin your adoption journey today</p>
+      <div class="role-select" id="reg-role-select">
+        <div class="role-option selected" onclick="selectRegRole('parent',this)">
+          <div class="role-icon">👨‍👩‍👧</div>
+          <div class="role-name">Prospective Parent</div>
+        </div>
+        <div class="role-option" onclick="selectRegRole('agency',this)">
+          <div class="role-icon">🏢</div>
+          <div class="role-name">Agency Staff</div>
+        </div>
+        <div class="role-option" onclick="selectRegRole('counselor',this)">
+          <div class="role-icon">🧑‍⚕️</div>
+          <div class="role-name">Counselor</div>
+        </div>
+        <div class="role-option" onclick="selectRegRole('admin',this)">
+          <div class="role-icon">⚙️</div>
+          <div class="role-name">System Admin</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input type="text" placeholder="Priya"/></div>
+        <div class="form-group"><label>Last Name</label><input type="text" placeholder="Sharma"/></div>
+      </div>
+      <div class="form-group"><label>Email Address</label><input type="email" placeholder="priya@example.com"/></div>
+      <div class="form-row">
+        <div class="form-group"><label>Password</label><input type="password" placeholder="••••••••"/></div>
+        <div class="form-group"><label>Confirm Password</label><input type="password" placeholder="••••••••"/></div>
+      </div>
+      <div id="parent-fields">
+        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="+91 98765 43210"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Marital Status</label>
+            <select id="reg-marital"><option>Married</option><option>Single</option><option>Divorced</option><option>Widowed</option></select>
+          </div>
+          <div class="form-group"><label>Occupation</label>
+            <input type="text" id="reg-occupation" placeholder="Software Engineer"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Preferred Min Age</label>
+            <input type="number" id="reg-age-min" min="0" max="17" value="0" placeholder="0"/>
+          </div>
+          <div class="form-group"><label>Preferred Max Age</label>
+            <input type="number" id="reg-age-max" min="1" max="18" value="10" placeholder="10"/>
+          </div>
+        </div>
+        <div class="form-group"><label>Preferred Gender</label>
+          <select id="reg-gender"><option>Any</option><option>Male</option><option>Female</option></select>
+        </div>
+        <div class="form-group"><label>Tell us about yourself and why you want to adopt</label>
+          <textarea id="reg-about" placeholder="Share your values, lifestyle, hobbies, and what kind of family environment you can provide..."></textarea>
+        </div>
+      </div>
+      <button class="btn-submit" onclick="doRegister()">Create Account</button>
+      <p style="text-align:center;margin-top:16px;font-size:14px;opacity:0.6;">
+        Already registered? <a onclick="showView('login')" style="color:var(--rust);cursor:pointer;font-weight:500;">Sign in</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== PARENT DASHBOARD ============================== -->
+<div id="view-parent-dashboard" class="view">
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="user-avatar">👩</div>
+        <div class="user-info">
+          <h4 id="dash-user-name">Priya Sharma</h4>
+          <p>Prospective Parent</p>
+        </div>
+      </div>
+      <div class="sidebar-nav">
+        <button class="sidebar-item active" onclick="showDashTab('overview')"><span class="icon">📊</span> Overview</button>
+        <button class="sidebar-item" onclick="showDashTab('browse-dash')"><span class="icon">👧</span> Browse Children</button>
+        <button class="sidebar-item" onclick="showDashTab('applications')"><span class="icon">📋</span> My Applications <span class="badge">2</span></button>
+        <button class="sidebar-item" onclick="showDashTab('profile')"><span class="icon">👤</span> My Profile</button>
+        <button class="sidebar-item" onclick="showDashTab('documents')"><span class="icon">📄</span> Documents</button>
+        <button class="sidebar-item" onclick="showDashTab('messages')"><span class="icon">💬</span> Messages</button>
+        <button class="sidebar-item" onclick="showDashTab('resources')"><span class="icon">📚</span> Resources</button>
+        <div class="divider"></div>
+        <button class="sidebar-item" onclick="logout()"><span class="icon">🚪</span> Sign Out</button>
+      </div>
+    </aside>
+    <main class="dashboard-main" id="dash-main-content">
+      <!-- Content injected by JS -->
+    </main>
+  </div>
+</div>
+
+<!-- ============================== AGENCY DASHBOARD ============================== -->
+<div id="view-agency-dashboard" class="view">
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="user-avatar">🏢</div>
+        <div class="user-info">
+          <h4>Agency Portal</h4>
+          <p>Adoption Agency Staff</p>
+        </div>
+      </div>
+      <div class="sidebar-nav">
+        <button class="sidebar-item active" onclick="showAgencyTab('overview')"><span class="icon">📊</span> Overview</button>
+        <button class="sidebar-item" onclick="showAgencyTab('children')"><span class="icon">👧</span> Manage Children</button>
+        <button class="sidebar-item" onclick="showAgencyTab('applications')"><span class="icon">📋</span> Applications <span class="badge">5</span></button>
+        <button class="sidebar-item" onclick="showAgencyTab('parents')"><span class="icon">👨‍👩‍👧</span> Parent Profiles</button>
+        <button class="sidebar-item" onclick="showAgencyTab('donations')"><span class="icon">💰</span> Donations</button>
+        <div class="divider"></div>
+        <button class="sidebar-item" onclick="logout()"><span class="icon">🚪</span> Sign Out</button>
+      </div>
+    </aside>
+    <main class="dashboard-main" id="agency-main-content">
+      <!-- injected by JS -->
+    </main>
+  </div>
+</div>
+
+<!-- ============================== COUNSELOR DASHBOARD ============================== -->
+<div id="view-counselor-dashboard" class="view">
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <div class="sidebar-user">
+        <div class="user-avatar">🧑‍⚕️</div>
+        <div class="user-info">
+          <h4 id="counselor-sidebar-name">Counselor</h4>
+          <p id="counselor-sidebar-spec">Child Psychologist</p>
+        </div>
+      </div>
+      <div class="sidebar-nav">
+        <button class="sidebar-item active" onclick="showCounselorTab('overview')"><span class="icon">📊</span> Overview</button>
+        <button class="sidebar-item" onclick="showCounselorTab('hcr')"><span class="icon">🏠</span> Home Study Reports</button>
+        <button class="sidebar-item" onclick="showCounselorTab('followup')"><span class="icon">🔄</span> Post-Adoption Follow-up</button>
+        <button class="sidebar-item" onclick="showCounselorTab('children-notes')"><span class="icon">📝</span> Child Notes</button>
+        <div class="divider"></div>
+        <button class="sidebar-item" onclick="logout()"><span class="icon">🚪</span> Sign Out</button>
+      </div>
+    </aside>
+    <main class="dashboard-main" id="counselor-main-content">
+      <!-- injected by JS -->
+    </main>
+  </div>
+</div>
+
+<!-- ============================== MODAL ============================== -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- ============================== TOAST ============================== -->
+<div class="toast hidden" id="toast">
+  <span id="toast-icon">✅</span>
+  <span id="toast-msg">Action completed</span>
+</div>
+
+<script>
+// ============================================================
+// DATABASE (In-Memory SQL-like, mirroring ER Diagram)
+// ============================================================
+// ============================================================
+// DATABASE — sourced directly from adoption_database.sql
+// ============================================================
+const DB = {
+
+  // TABLE 1 : CWC
+  CWC: [
+    { CWC_ID:1, District_Name:'Chennai',    Officer_In_Charge:'Mrs. Lakshmi Subramanian' },
+    { CWC_ID:2, District_Name:'Coimbatore', Officer_In_Charge:'Mr. Venkatesh Rajan' },
+    { CWC_ID:3, District_Name:'Madurai',    Officer_In_Charge:'Mrs. Radha Krishnan' },
+    { CWC_ID:4, District_Name:'Trichy',     Officer_In_Charge:'Mr. Arumugam Pillai' },
+    { CWC_ID:5, District_Name:'Salem',      Officer_In_Charge:'Mrs. Priya Nataraj' },
+  ],
+
+  // TABLE 2 : ORPHANAGE
+  ORPHANAGE: [
+    { Orphanage_ID:1, Reg_Number:'TN-ORG-001', Name:"Shanti Bhavan Children's Home", Location:'Adyar, Chennai, Tamil Nadu',          Capacity:60, Contact_Number:'044-23456789',  Email:'shantibhavan@gmail.com', Established_Year:1998, Current_Occupancy:42 },
+    { Orphanage_ID:2, Reg_Number:'TN-ORG-002', Name:'Karuna Kids Foundation',         Location:'RS Puram, Coimbatore, Tamil Nadu',     Capacity:45, Contact_Number:'0422-3456789',  Email:'karunakids@gmail.com',   Established_Year:2005, Current_Occupancy:30 },
+    { Orphanage_ID:3, Reg_Number:'TN-ORG-003', Name:"Rainbow Children's Trust",       Location:'Anna Nagar, Madurai, Tamil Nadu',      Capacity:50, Contact_Number:'0452-2345678',  Email:'rainbowct@gmail.com',    Established_Year:2001, Current_Occupancy:38 },
+    { Orphanage_ID:4, Reg_Number:'TN-ORG-004', Name:'Hope Springs Orphanage',         Location:'Cantonment, Trichy, Tamil Nadu',       Capacity:40, Contact_Number:'0431-3456789',  Email:'hopesprings@gmail.com',  Established_Year:2010, Current_Occupancy:25 },
+    { Orphanage_ID:5, Reg_Number:'TN-ORG-005', Name:'New Horizon Child Care',         Location:'Fairlands, Salem, Tamil Nadu',         Capacity:35, Contact_Number:'0427-2345678',  Email:'newhorizon@gmail.com',   Established_Year:2008, Current_Occupancy:20 },
+  ],
+
+  // TABLE 3 : COUNSELOR
+  COUNSELOR: [
+    { Counselor_ID:1, Name:'Dr. Meena Subramaniam',  Specialization:'Child Psychology',   License_No:'LIC-2010-001', Phone:'9876543210', Email:'meena.sub@counseling.in',    Years_of_Experience:14, Assigned_Region:'Chennai' },
+    { Counselor_ID:2, Name:'Dr. Arun Prakash',       Specialization:'Family Therapy',     License_No:'LIC-2012-002', Phone:'9876543211', Email:'arun.prakash@counseling.in', Years_of_Experience:12, Assigned_Region:'Coimbatore' },
+    { Counselor_ID:3, Name:'Ms. Deepa Ramachandran', Specialization:'Trauma Counseling',  License_No:'LIC-2015-003', Phone:'9876543212', Email:'deepa.ram@counseling.in',     Years_of_Experience:9,  Assigned_Region:'Madurai' },
+    { Counselor_ID:4, Name:'Dr. Karthikeyan Nair',   Specialization:'Behavioral Therapy', License_No:'LIC-2008-004', Phone:'9876543213', Email:'karthik.nair@counseling.in', Years_of_Experience:16, Assigned_Region:'Trichy' },
+    { Counselor_ID:5, Name:'Ms. Sundari Venkatesan', Specialization:'Attachment Therapy', License_No:'LIC-2018-005', Phone:'9876543214', Email:'sundari.v@counseling.in',     Years_of_Experience:6,  Assigned_Region:'Salem' },
+  ],
+
+  // TABLE 4 : SYSTEM_ADMIN
+  SYSTEM_ADMIN: [
+    { Admin_ID:1, Username:'admin_super',      Access_Level:'Super Admin',     Email:'super@adoptiondb.in',   Last_Login:'2024-12-01 09:00:00' },
+    { Admin_ID:2, Username:'admin_chennai',    Access_Level:'Regional Admin',  Email:'chennai@adoptiondb.in', Last_Login:'2024-11-28 14:30:00' },
+    { Admin_ID:3, Username:'admin_coimbatore', Access_Level:'Regional Admin',  Email:'cbe@adoptiondb.in',     Last_Login:'2024-11-25 11:00:00' },
+    { Admin_ID:4, Username:'admin_records',    Access_Level:'Records Manager', Email:'records@adoptiondb.in', Last_Login:'2024-12-02 08:45:00' },
+    { Admin_ID:5, Username:'admin_legal',      Access_Level:'Legal Admin',     Email:'legal@adoptiondb.in',   Last_Login:'2024-11-30 16:00:00' },
+  ],
+
+  // TABLE 5 : PAP
+  PAP: [
+    { PAP_ID:1,  Names:'Ramesh and Preethi Kumar',        Address:'14, Gandhi Street, Adyar, Chennai',               Health_Status:'Excellent', Phone:'9944556677', Email:'ramesh.kumar@email.com',   Occupation:'Software Engineer / Teacher',    Salary:85000,  Income_Status:'Upper Middle', Marital_Status:'Married', Religion:'Hindu',    Preferred_Age_Min:5,  Preferred_Age_Max:10, Preferred_Gender:'Any',    Can_Handle_Special_Needs:false, Num_Existing_Children:0, Housing_Type:'Independent House',   Values_Description:'Traditional, education-focused, warm and nurturing household',                            Interests:'Chess, Reading, Gardening, Cricket, Cooking',          Languages:'Tamil, English',             Has_Pets:false, Pet_Types:null },
+    { PAP_ID:2,  Names:'Sneha Iyer',                      Address:'22, 4th Avenue, Besant Nagar, Chennai',           Health_Status:'Good',      Phone:'9944556678', Email:'sneha.iyer@email.com',      Occupation:'Architect',                      Salary:62000,  Income_Status:'Middle',       Marital_Status:'Single',  Religion:'Hindu',    Preferred_Age_Min:0,  Preferred_Age_Max:5,  Preferred_Gender:'Female', Can_Handle_Special_Needs:false, Num_Existing_Children:0, Housing_Type:'Apartment',           Values_Description:'Independent, creative, safe nurturing home for a girl child',                             Interests:'Painting, Crochet, Reading, Animals, Interior Design', Languages:'Tamil, English, Hindi',      Has_Pets:true,  Pet_Types:'Dog' },
+    { PAP_ID:3,  Names:'Rajiv and Anita Sharma',          Address:'5, Lake View Apartments, RS Puram, Coimbatore',   Health_Status:'Good',      Phone:'9944556679', Email:'rajiv.sharma@email.com',    Occupation:'Doctor / Homemaker',             Salary:150000, Income_Status:'High',         Marital_Status:'Married', Religion:'Hindu',    Preferred_Age_Min:0,  Preferred_Age_Max:14, Preferred_Gender:'Any',    Can_Handle_Special_Needs:true,  Num_Existing_Children:1, Housing_Type:'Independent House',   Values_Description:'Compassionate, medically equipped home, deeply inclusive and caring',                     Interests:'Tennis, Swimming, Music, Cooking, Yoga',               Languages:'Hindi, English, Tamil',      Has_Pets:true,  Pet_Types:'Cat' },
+    { PAP_ID:4,  Names:'Deepa Nair',                      Address:'8, MG Road, Pasumalai, Madurai',                  Health_Status:'Excellent', Phone:'9944556680', Email:'deepa.nair@email.com',      Occupation:'Professor',                      Salary:55000,  Income_Status:'Middle',       Marital_Status:'Single',  Religion:'Hindu',    Preferred_Age_Min:3,  Preferred_Age_Max:8,  Preferred_Gender:'Any',    Can_Handle_Special_Needs:false, Num_Existing_Children:0, Housing_Type:'Apartment',           Values_Description:'Academic, intellectual, deep love for learning and science',                               Interests:'Stargazing, Science, Reading, Football, Nature walks',  Languages:'Malayalam, Tamil, English',  Has_Pets:false, Pet_Types:null },
+    { PAP_ID:5,  Names:'Suresh and Meenakshi Pillai',     Address:'3, Temple Street, Woraiyur, Trichy',              Health_Status:'Good',      Phone:'9944556681', Email:'suresh.pillai@email.com',   Occupation:'Business Owner / Homemaker',     Salary:95000,  Income_Status:'Upper Middle', Marital_Status:'Married', Religion:'Hindu',    Preferred_Age_Min:6,  Preferred_Age_Max:12, Preferred_Gender:'Male',   Can_Handle_Special_Needs:false, Num_Existing_Children:2, Housing_Type:'Independent House',   Values_Description:'Religious, disciplined, strong tradition and value for sports',                           Interests:'Cricket, Badminton, Cooking, Swimming',                Languages:'Tamil, English',             Has_Pets:false, Pet_Types:null },
+    { PAP_ID:6,  Names:'Arun Menon',                      Address:'45, 7th Street, Anna Nagar, Chennai',             Health_Status:'Good',      Phone:'9944556682', Email:'arun.menon@email.com',      Occupation:'Lawyer',                         Salary:72000,  Income_Status:'Upper Middle', Marital_Status:'Single',  Religion:'Hindu',    Preferred_Age_Min:0,  Preferred_Age_Max:12, Preferred_Gender:'Any',    Can_Handle_Special_Needs:true,  Num_Existing_Children:0, Housing_Type:'Independent House',   Values_Description:'Empathetic and patient; believes every child deserves a loving family',                   Interests:'Reading, Chess, Swimming, Sudoku, Badminton',          Languages:'Malayalam, Tamil, English',  Has_Pets:false, Pet_Types:null },
+    { PAP_ID:7,  Names:'Priya and Kiran Patel',           Address:'12, Jubilee Hills, Hyderabad',                    Health_Status:'Excellent', Phone:'9944556683', Email:'priya.patel@email.com',     Occupation:'Finance Manager / IT Consultant', Salary:155000, Income_Status:'High',         Marital_Status:'Married', Religion:'Jain',    Preferred_Age_Min:0,  Preferred_Age_Max:4,  Preferred_Gender:'Any',    Can_Handle_Special_Needs:true,  Num_Existing_Children:0, Housing_Type:'Independent House',   Values_Description:'Modern, progressive, highly supportive environment for toddlers and young children',      Interests:'Art, Music, Yoga, Cooking, Crochet',                   Languages:'Gujarati, Hindi, English',   Has_Pets:true,  Pet_Types:'Cat, Dog' },
+    { PAP_ID:8,  Names:'Sunita Reddy',                    Address:'67, Road No. 5, Banjara Hills, Hyderabad',        Health_Status:'Good',      Phone:'9944556684', Email:'sunita.reddy@email.com',    Occupation:'School Principal',               Salary:52000,  Income_Status:'Middle',       Marital_Status:'Single',  Religion:'Hindu',    Preferred_Age_Min:5,  Preferred_Age_Max:12, Preferred_Gender:'Female', Can_Handle_Special_Needs:false, Num_Existing_Children:0, Housing_Type:'Apartment',           Values_Description:'Education-first, structured, warm and supportive household',                              Interests:'Reading, Painting, Badminton, Sudoku',                 Languages:'Telugu, English, Hindi',     Has_Pets:false, Pet_Types:null },
+    { PAP_ID:9,  Names:'Mohan and Lalitha Krishnan',      Address:'9, Luz Church Road, Mylapore, Chennai',           Health_Status:'Excellent', Phone:'9944556685', Email:'mohan.krishnan@email.com',  Occupation:'Civil Engineer / Homemaker',     Salary:105000, Income_Status:'High',         Marital_Status:'Married', Religion:'Hindu',    Preferred_Age_Min:8,  Preferred_Age_Max:14, Preferred_Gender:'Male',   Can_Handle_Special_Needs:false, Num_Existing_Children:1, Housing_Type:'Independent House',   Values_Description:'Disciplined, sports-oriented, value courage and independence in a child',                 Interests:'Football, Cricket, Chess, Woodworking',                Languages:'Tamil, English',             Has_Pets:false, Pet_Types:null },
+    { PAP_ID:10, Names:'Kavitha Rajan',                   Address:'33, Nehru Street, RS Puram, Coimbatore',          Health_Status:'Good',      Phone:'9944556686', Email:'kavitha.rajan@email.com',   Occupation:'Nutritionist',                   Salary:67000,  Income_Status:'Middle',       Marital_Status:'Single',  Religion:'Hindu',    Preferred_Age_Min:5,  Preferred_Age_Max:10, Preferred_Gender:'Any',    Can_Handle_Special_Needs:false, Num_Existing_Children:0, Housing_Type:'Apartment',           Values_Description:'Health-conscious, active lifestyle, great love for nature and animals',                   Interests:'Tennis, Hiking, Cooking, Animals, Gardening',          Languages:'Tamil, English',             Has_Pets:true,  Pet_Types:'Dog, Rabbit' },
+    { PAP_ID:11, Names:'Vijay and Sowmya Balasubramanian',Address:'2, Boat Club Road, Srirangam, Trichy',            Health_Status:'Excellent', Phone:'9944556687', Email:'vijay.bala@email.com',      Occupation:'IAS Officer / Teacher',          Salary:112000, Income_Status:'High',         Marital_Status:'Married', Religion:'Hindu',    Preferred_Age_Min:0,  Preferred_Age_Max:6,  Preferred_Gender:'Any',    Can_Handle_Special_Needs:true,  Num_Existing_Children:0, Housing_Type:'Government Quarters',   Values_Description:'Principled, community-oriented, extremely patient and deeply caring household',           Interests:'Classical Music, Reading, Gardening, Chess',           Languages:'Tamil, English, Sanskrit',   Has_Pets:false, Pet_Types:null },
+    { PAP_ID:12, Names:'Ravi Shankar',                    Address:'18, 2nd Lane, Nungambakkam, Chennai',             Health_Status:'Good',      Phone:'9944556688', Email:'ravi.shankar@email.com',    Occupation:'Music Teacher / Musician',       Salary:48000,  Income_Status:'Middle',       Marital_Status:'Single',  Religion:'Hindu',    Preferred_Age_Min:0,  Preferred_Age_Max:14, Preferred_Gender:'Any',    Can_Handle_Special_Needs:false, Num_Existing_Children:0, Housing_Type:'Apartment',           Values_Description:"Artistic and free-spirited; believes in letting a child explore creativity freely",       Interests:'Music, Painting, Football, Stargazing, Crochet',       Languages:'Tamil, English, Kannada',    Has_Pets:false, Pet_Types:null },
+  ],
+
+  // TABLE 6 : AGENCY_STAFF
+  AGENCY_STAFF: [
+    { Staff_ID:1, Name:'Muthu Selvam',   Role:'Manager',   Phone:'9876501001', Email:'muthu.selvam@shantibhavan.in', Hire_Date:'2015-06-01', Orphanage_ID:1 },
+    { Staff_ID:2, Name:'Radha Bai',      Role:'Caretaker', Phone:'9876501002', Email:'radha.bai@shantibhavan.in',    Hire_Date:'2016-03-15', Orphanage_ID:1 },
+    { Staff_ID:3, Name:'Geetha Rajan',   Role:'Caretaker', Phone:'9876501003', Email:'geetha.rajan@karunakids.in',   Hire_Date:'2018-07-20', Orphanage_ID:2 },
+    { Staff_ID:4, Name:'Palanisamy M',   Role:'Manager',   Phone:'9876501004', Email:'palani@karunakids.in',         Hire_Date:'2017-01-10', Orphanage_ID:2 },
+    { Staff_ID:5, Name:'Anbu Selvi',     Role:'Caretaker', Phone:'9876501005', Email:'anbu.selvi@rainbowct.in',      Hire_Date:'2019-05-05', Orphanage_ID:3 },
+    { Staff_ID:6, Name:'Kumar Raj',      Role:'Manager',   Phone:'9876501006', Email:'kumar.raj@hopesprings.in',     Hire_Date:'2014-11-20', Orphanage_ID:4 },
+    { Staff_ID:7, Name:'Valli Murugan',  Role:'Caretaker', Phone:'9876501007', Email:'valli.m@hopesprings.in',       Hire_Date:'2020-08-01', Orphanage_ID:4 },
+    { Staff_ID:8, Name:'Senthil Nathan', Role:'Manager',   Phone:'9876501008', Email:'senthil.n@newhorizon.in',      Hire_Date:'2016-09-15', Orphanage_ID:5 },
+  ],
+
+  // TABLE 7 : CHILD (18 rows from SQL, enriched with display fields)
+  CHILD: [
+    { Child_ID:1,  Name:'Arjun S',     Age:7,  Gender:'Male',   Is_Legally_Free:true,  CWC_ID:1, Orphanage_ID:1, Health_Status:'Good',                                                     Education_Level:'Primary School - Grade 2',          Nationality:'Indian', Religion:'Hindu',    Language:'Tamil',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Curious, gentle, empathetic, loves storytelling and deep thinking',             Interests:'Chess, Reading, Drawing, Sudoku, Stargazing',            Siblings_Count:0, Date_Of_Birth:'2017-04-12', Known_Family:'Maternal grandmother deceased; no other known relatives',
+      interests:['Chess','Reading','Drawing','Sudoku','Stargazing'], emotionTag:'Curious & Gentle',          color:'#E8C4B0', emoji:'🧒', specialNeeds:false },
+    { Child_ID:2,  Name:'Priya V',     Age:5,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:1, Orphanage_ID:1, Health_Status:'Managed - Mild asthma, controlled with inhaler',           Education_Level:'Pre-KG',                             Nationality:'Indian', Religion:'Hindu',    Language:'Telugu',  Second_Language:'Tamil',   Special_Needs:'Mild Asthma - controlled with inhaler; routine checkup every 3 months',         Personality_Traits:'Cheerful, affectionate, talkative, loves animals and hugging',                  Interests:'Painting, Animals, Dancing, Music, Crochet',             Siblings_Count:0, Date_Of_Birth:'2019-08-23', Known_Family:'No known relatives',
+      interests:['Painting','Animals','Dancing','Music','Crochet'], emotionTag:'Cheerful & Affectionate',    color:'#D9C4B0', emoji:'👧', specialNeeds:true },
+    { Child_ID:3,  Name:'Rahul M',     Age:10, Gender:'Male',   Is_Legally_Free:true,  CWC_ID:2, Orphanage_ID:2, Health_Status:'Excellent',                                                Education_Level:'Primary School - Grade 5',           Nationality:'Indian', Religion:'Hindu',    Language:'Hindi',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Energetic, competitive, natural leader, very social and outgoing',               Interests:'Football, Science, Cricket, Stargazing, Sudoku',         Siblings_Count:1, Date_Of_Birth:'2014-02-17', Known_Family:'Older sibling Rohit M in separate facility; no parental contact',
+      interests:['Football','Science','Cricket','Stargazing','Sudoku'], emotionTag:'Energetic & Outgoing',   color:'#B0CDD9', emoji:'👦', specialNeeds:false },
+    { Child_ID:4,  Name:'Meera K',     Age:8,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:1, Orphanage_ID:1, Health_Status:'Good',                                                     Education_Level:'Primary School - Grade 3',           Nationality:'Indian', Religion:'Hindu',    Language:'Tamil',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Creative, quiet, deeply focused, expresses herself through art and craft',       Interests:'Crochet, Dance, Painting, Reading, Animals',             Siblings_Count:0, Date_Of_Birth:'2016-06-05', Known_Family:'No known relatives',
+      interests:['Crochet','Dance','Painting','Reading','Animals'], emotionTag:'Creative & Focused',         color:'#C4D9C8', emoji:'👧', specialNeeds:false },
+    { Child_ID:5,  Name:'Karthik R',   Age:12, Gender:'Male',   Is_Legally_Free:true,  CWC_ID:3, Orphanage_ID:3, Health_Status:'Excellent',                                                Education_Level:'Middle School - Grade 7',            Nationality:'Indian', Religion:'Hindu',    Language:'Tamil',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Analytical, disciplined, goal-oriented, loves astronomy and puzzles',            Interests:'Stargazing, Chess, Cricket, Science, Sudoku',            Siblings_Count:0, Date_Of_Birth:'2012-11-30', Known_Family:"Father incarcerated; no contact maintained by child's choice",
+      interests:['Stargazing','Chess','Cricket','Science','Sudoku'], emotionTag:'Analytical & Disciplined',  color:'#B0D9C4', emoji:'👦', specialNeeds:false },
+    { Child_ID:6,  Name:'Ananya B',    Age:6,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:2, Orphanage_ID:2, Health_Status:'Good - Speech therapy ongoing, strong progress noted',    Education_Level:'LKG with language support',           Nationality:'Indian', Religion:'Hindu',    Language:'Bengali', Second_Language:'Tamil',   Special_Needs:'Mild speech delay - improving steadily with weekly therapy sessions',           Personality_Traits:'Gentle, artistic, loves music deeply, responds very well to routine and structure', Interests:'Painting, Music, Animals, Nature walks, Drawing',        Siblings_Count:1, Date_Of_Birth:'2018-03-14', Known_Family:'Younger sibling Neha B in same orphanage',
+      interests:['Painting','Music','Animals','Nature walks','Drawing'], emotionTag:'Gentle & Artistic',     color:'#D9B0C4', emoji:'👧', specialNeeds:true },
+    { Child_ID:7,  Name:'Vikram P',    Age:9,  Gender:'Male',   Is_Legally_Free:true,  CWC_ID:3, Orphanage_ID:3, Health_Status:'Good',                                                     Education_Level:'Primary School - Grade 4',           Nationality:'Indian', Religion:'Hindu',    Language:'Marathi', Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Adventurous, curious, sporty, loves physical challenges and exploring',          Interests:'Tennis, Space exploration, Swimming, Football, Science',  Siblings_Count:0, Date_Of_Birth:'2015-09-01', Known_Family:'No known relatives',
+      interests:['Tennis','Swimming','Football','Science'], emotionTag:'Adventurous & Sporty',               color:'#B0C4D9', emoji:'🧒', specialNeeds:false },
+    { Child_ID:8,  Name:'Shreya N',    Age:11, Gender:'Female', Is_Legally_Free:true,  CWC_ID:1, Orphanage_ID:1, Health_Status:'Excellent',                                                Education_Level:'Middle School - Grade 6',            Nationality:'Indian', Religion:'Christian',Language:'Tamil',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Intellectual, mature for her age, great empathy, gifted at writing and music',  Interests:'Reading, Chess, Writing, Music, Drawing',                Siblings_Count:0, Date_Of_Birth:'2013-05-22', Known_Family:'Maternal aunt - lost contact approximately 3 years ago',
+      interests:['Reading','Chess','Writing','Music','Drawing'], emotionTag:'Intellectual & Empathetic',     color:'#D9D4B0', emoji:'👧', specialNeeds:false },
+    { Child_ID:9,  Name:'Aditya T',    Age:4,  Gender:'Male',   Is_Legally_Free:true,  CWC_ID:4, Orphanage_ID:4, Health_Status:'Good',                                                     Education_Level:'Nursery',                            Nationality:'Indian', Religion:'Hindu',    Language:'Telugu',  Second_Language:'Tamil',   Special_Needs:'None',                                                                          Personality_Traits:'Playful, extremely affectionate, loves animals, boundlessly curious',            Interests:'Drawing, Animals, Music, Outdoor play, Dancing',         Siblings_Count:0, Date_Of_Birth:'2020-12-10', Known_Family:'No known relatives',
+      interests:['Drawing','Animals','Music','Outdoor play','Dancing'], emotionTag:'Playful & Affectionate', color:'#C9B0D9', emoji:'👶', specialNeeds:false },
+    { Child_ID:10, Name:'Kavya Z',     Age:7,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:1, Orphanage_ID:1, Health_Status:'Excellent',                                                Education_Level:'Primary School - Grade 2',           Nationality:'Indian', Religion:'Muslim',   Language:'Tamil',   Second_Language:'Urdu',    Special_Needs:'None',                                                                          Personality_Traits:'Kind, highly imaginative, loves science experiments, exceptional memory',        Interests:'Swimming, Art, Science, Reading, Chess',                 Siblings_Count:0, Date_Of_Birth:'2017-01-28', Known_Family:'Grandparents are elderly and unable to provide care; supportive of adoption',
+      interests:['Swimming','Art','Science','Reading','Chess'], emotionTag:'Kind & Imaginative',             color:'#D9C4B0', emoji:'👧', specialNeeds:false },
+    { Child_ID:11, Name:'Rohan S',     Age:13, Gender:'Male',   Is_Legally_Free:true,  CWC_ID:2, Orphanage_ID:2, Health_Status:'Excellent',                                                Education_Level:'Middle School - Grade 8',            Nationality:'Indian', Religion:'Sikh',     Language:'Punjabi', Second_Language:'Hindi',   Special_Needs:'None',                                                                          Personality_Traits:'Confident, sporty, naturally protective of younger children, strong leader',     Interests:'Football, Basketball, Cricket, Sudoku, Swimming',        Siblings_Count:0, Date_Of_Birth:'2011-07-19', Known_Family:'No known relatives',
+      interests:['Football','Basketball','Cricket','Sudoku','Swimming'], emotionTag:'Confident & Leader',    color:'#B0D9D4', emoji:'🧒', specialNeeds:false },
+    { Child_ID:12, Name:'Divya L',     Age:5,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:5, Orphanage_ID:5, Health_Status:'Good - Mild Autism Spectrum, high-functioning, excellent social progress', Education_Level:'LKG with specialist support', Nationality:'Indian', Religion:'Hindu', Language:'Tamil', Second_Language:'English', Special_Needs:'Mild Autism Spectrum Disorder - high functioning; strong social progress with structured support', Personality_Traits:'Gentle, routine-loving, musically gifted, deeply empathetic toward animals', Interests:'Music, Animals, Painting, Sensory play, Dancing', Siblings_Count:0, Date_Of_Birth:'2019-10-03', Known_Family:'No known relatives',
+      interests:['Music','Animals','Painting','Dancing'], emotionTag:'Gentle & Musically Gifted',           color:'#E8C4B0', emoji:'👧', specialNeeds:true },
+    { Child_ID:13, Name:'Siddharth A', Age:14, Gender:'Male',   Is_Legally_Free:true,  CWC_ID:3, Orphanage_ID:3, Health_Status:'Excellent',                                                Education_Level:'High School - Grade 9',              Nationality:'Indian', Religion:'Hindu',    Language:'Hindi',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Brilliant, introverted, highly logical, passionate about problem solving and technology', Interests:'Chess, Coding, Science, Reading, Stargazing',           Siblings_Count:0, Date_Of_Birth:'2010-04-25', Known_Family:'Mother deceased; father has relinquished legal rights',
+      interests:['Chess','Coding','Science','Reading','Stargazing'], emotionTag:'Brilliant & Logical',       color:'#C4C8D9', emoji:'🧑', specialNeeds:false },
+    { Child_ID:14, Name:'Nithya R',    Age:6,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:4, Orphanage_ID:4, Health_Status:'Good',                                                     Education_Level:'LKG',                                Nationality:'Indian', Religion:'Hindu',    Language:'Tamil',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Bubbly, deeply creative, loves to dance, extremely expressive and joyful',      Interests:'Dance, Painting, Crochet, Animals, Music',               Siblings_Count:0, Date_Of_Birth:'2018-09-17', Known_Family:'No known relatives',
+      interests:['Dance','Painting','Crochet','Animals','Music'], emotionTag:'Bubbly & Joyful',             color:'#D4B0D9', emoji:'👧', specialNeeds:false },
+    { Child_ID:15, Name:'Ajay C',      Age:10, Gender:'Male',   Is_Legally_Free:true,  CWC_ID:5, Orphanage_ID:5, Health_Status:'Good',                                                     Education_Level:'Primary School - Grade 5',           Nationality:'Indian', Religion:'Hindu',    Language:'Malayalam',Second_Language:'Tamil',  Special_Needs:'None',                                                                          Personality_Traits:'Team player, loyal, easygoing, loves outdoor sports and being part of a group', Interests:'Cricket, Football, Swimming, Drawing, Badminton',         Siblings_Count:2, Date_Of_Birth:'2014-08-06', Known_Family:'One sibling in same orphanage; another in foster care in Kerala',
+      interests:['Cricket','Football','Swimming','Drawing','Badminton'], emotionTag:'Loyal & Team Player',  color:'#B0D9C4', emoji:'🧒', specialNeeds:false },
+    { Child_ID:16, Name:'Bhavana D',   Age:8,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:2, Orphanage_ID:2, Health_Status:'Excellent',                                                Education_Level:'Primary School - Grade 3',           Nationality:'Indian', Religion:'Hindu',    Language:'Kannada', Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Thoughtful, loves books, quietly caring toward younger children, very responsible', Interests:'Reading, Crochet, Painting, Badminton, Animals',         Siblings_Count:0, Date_Of_Birth:'2016-03-29', Known_Family:'Paternal uncle refused custody after assessment',
+      interests:['Reading','Crochet','Painting','Badminton','Animals'], emotionTag:'Thoughtful & Caring',   color:'#C8D9B0', emoji:'👧', specialNeeds:false },
+    { Child_ID:17, Name:'Ishan G',     Age:3,  Gender:'Male',   Is_Legally_Free:true,  CWC_ID:4, Orphanage_ID:4, Health_Status:'Good',                                                     Education_Level:'Nursery',                            Nationality:'Indian', Religion:'Jain',     Language:'Gujarati',Second_Language:'Hindi',   Special_Needs:'None',                                                                          Personality_Traits:'Bubbly and endlessly playful, loves music and rhythm, smiles constantly',       Interests:'Music, Animals, Dancing, Sensory toys, Drawing',         Siblings_Count:0, Date_Of_Birth:'2021-02-14', Known_Family:'No known relatives',
+      interests:['Music','Animals','Dancing','Drawing'], emotionTag:'Bubbly & Playful',                     color:'#D9D4B0', emoji:'👶', specialNeeds:false },
+    { Child_ID:18, Name:'Tara J',      Age:9,  Gender:'Female', Is_Legally_Free:true,  CWC_ID:5, Orphanage_ID:5, Health_Status:'Excellent',                                                Education_Level:'Primary School - Grade 4',           Nationality:'Indian', Religion:'Christian', Language:'Tamil',   Second_Language:'English', Special_Needs:'None',                                                                          Personality_Traits:'Adventurous, scientifically curious, warm personality, loves outdoors and exploration', Interests:'Tennis, Stargazing, Science, Football, Reading',         Siblings_Count:0, Date_Of_Birth:'2015-11-08', Known_Family:'No known relatives',
+      interests:['Tennis','Stargazing','Science','Football','Reading'], emotionTag:'Adventurous & Curious', color:'#B0C8D9', emoji:'👧', specialNeeds:false },
+  ],
+
+  // TABLE 8 : HCR (12 rows)
+  HCR: [
+    { HCR_ID:1,  Visit_Date:'2024-03-15', Home_Environment_Score:88, Psychologist_Notes:'Stable, warm couple with excellent emotional readiness. Strong extended family support network present.',                                                          Approval_Status:'Approved',               PAP_ID:1,  Counselor_ID:1, House_Size:'3BHK House - 1800 sqft',      Safety_Score:90, Neighborhood_Type:'Residential - Safe',    Has_Previous_Adoption:false },
+    { HCR_ID:2,  Visit_Date:'2024-04-10', Home_Environment_Score:82, Psychologist_Notes:'Emotionally stable single parent with mature, thoughtful approach. Pet-friendly and creatively stimulating home.',                                                 Approval_Status:'Approved',               PAP_ID:2,  Counselor_ID:1, House_Size:'2BHK Apartment - 1100 sqft',  Safety_Score:85, Neighborhood_Type:'Urban - Safe',          Has_Previous_Adoption:false },
+    { HCR_ID:3,  Visit_Date:'2024-02-20', Home_Environment_Score:95, Psychologist_Notes:'Medical professionals with exceptional physical and emotional preparedness. Fully inclusive compassionate environment.',                                             Approval_Status:'Approved',               PAP_ID:3,  Counselor_ID:2, House_Size:'4BHK House - 2800 sqft',      Safety_Score:95, Neighborhood_Type:'Suburban - Safe',       Has_Previous_Adoption:true  },
+    { HCR_ID:4,  Visit_Date:'2024-05-05', Home_Environment_Score:78, Psychologist_Notes:'Single academic. Strong intellectual home. Limited social circle but demonstrated deep emotional bonding capacity.',                                                Approval_Status:'Approved',               PAP_ID:4,  Counselor_ID:3, House_Size:'2BHK Apartment - 1000 sqft',  Safety_Score:80, Neighborhood_Type:'Urban - Moderate',      Has_Previous_Adoption:false },
+    { HCR_ID:5,  Visit_Date:'2024-03-28', Home_Environment_Score:84, Psychologist_Notes:'Traditional family, sport-focused household. Solid home environment. Advised on flexible parenting approaches.',                                                   Approval_Status:'Approved',               PAP_ID:5,  Counselor_ID:4, House_Size:'3BHK House - 1700 sqft',      Safety_Score:87, Neighborhood_Type:'Residential - Safe',    Has_Previous_Adoption:false },
+    { HCR_ID:6,  Visit_Date:'2024-06-01', Home_Environment_Score:90, Psychologist_Notes:'Single father with remarkable patience. Legal background gives excellent understanding of child rights and protection.',                                            Approval_Status:'Approved',               PAP_ID:6,  Counselor_ID:1, House_Size:'3BHK House - 1600 sqft',      Safety_Score:92, Neighborhood_Type:'Residential - Safe',    Has_Previous_Adoption:false },
+    { HCR_ID:7,  Visit_Date:'2024-01-15', Home_Environment_Score:97, Psychologist_Notes:'Outstanding household in every dimension. High income, emotionally mature couple. Best suited for special needs or very young child.',                              Approval_Status:'Approved',               PAP_ID:7,  Counselor_ID:2, House_Size:'5BHK House - 3500 sqft',      Safety_Score:98, Neighborhood_Type:'Gated Community - Secure',Has_Previous_Adoption:false },
+    { HCR_ID:8,  Visit_Date:'2024-04-22', Home_Environment_Score:80, Psychologist_Notes:'Dedicated single parent with education-focused home. As a school principal, has strong understanding of child development psychology.',                             Approval_Status:'Approved',               PAP_ID:8,  Counselor_ID:3, House_Size:'2BHK Apartment - 1050 sqft',  Safety_Score:82, Neighborhood_Type:'Urban - Safe',          Has_Previous_Adoption:false },
+    { HCR_ID:9,  Visit_Date:'2024-03-10', Home_Environment_Score:86, Psychologist_Notes:'Established couple with one biological child. Sports-oriented household. Good family dynamics observed. Existing child welcoming.',                                 Approval_Status:'Approved',               PAP_ID:9,  Counselor_ID:4, House_Size:'3BHK House - 1900 sqft',      Safety_Score:88, Neighborhood_Type:'Residential - Safe',    Has_Previous_Adoption:false },
+    { HCR_ID:10, Visit_Date:'2024-05-18', Home_Environment_Score:83, Psychologist_Notes:'Health-conscious single parent with active lifestyle. Pets in home indicate nurturing instinct. Some income constraints noted.',                                    Approval_Status:'Approved',               PAP_ID:10, Counselor_ID:5, House_Size:'2BHK Apartment - 1100 sqft',  Safety_Score:84, Neighborhood_Type:'Suburban - Safe',       Has_Previous_Adoption:false },
+    { HCR_ID:11, Visit_Date:'2024-02-08', Home_Environment_Score:93, Psychologist_Notes:'Government officer couple. Extremely principled, stable income, highly patient. Ideal environment for special needs or very young child.',                          Approval_Status:'Approved',               PAP_ID:11, Counselor_ID:4, House_Size:'3BHK Govt Quarters - 1500 sqft',Safety_Score:91, Neighborhood_Type:'Residential - Safe',    Has_Previous_Adoption:false },
+    { HCR_ID:12, Visit_Date:'2024-06-15', Home_Environment_Score:75, Psychologist_Notes:'Single musician with creative, nurturing environment. Modest income and small apartment noted. Conditionally approved pending review.',                             Approval_Status:'Conditionally Approved', PAP_ID:12, Counselor_ID:5, House_Size:'1BHK Apartment - 600 sqft',   Safety_Score:78, Neighborhood_Type:'Urban - Moderate',      Has_Previous_Adoption:false },
+  ],
+
+  // TABLE 9 : ADOPTION_APPLICATION (12 rows)
+  ADOPTION_APPLICATION: [
+    { App_ID:1,  Submission_Date:'2024-04-01', Status:'Approved',     Last_Updated:'2024-07-15', Rejection_Reason:null,                                                                                    Priority_Level:'High',   PAP_ID:1,  Child_ID:1,  HCR_ID:1  },
+    { App_ID:2,  Submission_Date:'2024-05-10', Status:'Approved',     Last_Updated:'2024-08-20', Rejection_Reason:null,                                                                                    Priority_Level:'Medium', PAP_ID:2,  Child_ID:2,  HCR_ID:2  },
+    { App_ID:3,  Submission_Date:'2024-03-15', Status:'Completed',    Last_Updated:'2024-09-01', Rejection_Reason:null,                                                                                    Priority_Level:'High',   PAP_ID:3,  Child_ID:12, HCR_ID:3  },
+    { App_ID:4,  Submission_Date:'2024-06-01', Status:'Under Review', Last_Updated:'2024-11-30', Rejection_Reason:null,                                                                                    Priority_Level:'Medium', PAP_ID:4,  Child_ID:8,  HCR_ID:4  },
+    { App_ID:5,  Submission_Date:'2024-04-20', Status:'Approved',     Last_Updated:'2024-07-30', Rejection_Reason:null,                                                                                    Priority_Level:'High',   PAP_ID:5,  Child_ID:11, HCR_ID:5  },
+    { App_ID:6,  Submission_Date:'2024-07-01', Status:'Under Review', Last_Updated:'2024-11-25', Rejection_Reason:null,                                                                                    Priority_Level:'High',   PAP_ID:6,  Child_ID:6,  HCR_ID:6  },
+    { App_ID:7,  Submission_Date:'2024-02-28', Status:'Completed',    Last_Updated:'2024-06-15', Rejection_Reason:null,                                                                                    Priority_Level:'High',   PAP_ID:7,  Child_ID:17, HCR_ID:7  },
+    { App_ID:8,  Submission_Date:'2024-05-22', Status:'Under Review', Last_Updated:'2024-11-28', Rejection_Reason:null,                                                                                    Priority_Level:'Medium', PAP_ID:8,  Child_ID:16, HCR_ID:8  },
+    { App_ID:9,  Submission_Date:'2024-04-05', Status:'Approved',     Last_Updated:'2024-08-10', Rejection_Reason:null,                                                                                    Priority_Level:'High',   PAP_ID:9,  Child_ID:13, HCR_ID:9  },
+    { App_ID:10, Submission_Date:'2024-06-10', Status:'Under Review', Last_Updated:'2024-11-20', Rejection_Reason:null,                                                                                    Priority_Level:'Medium', PAP_ID:10, Child_ID:14, HCR_ID:10 },
+    { App_ID:11, Submission_Date:'2024-03-20', Status:'Completed',    Last_Updated:'2024-07-25', Rejection_Reason:null,                                                                                    Priority_Level:'High',   PAP_ID:11, Child_ID:9,  HCR_ID:11 },
+    { App_ID:12, Submission_Date:'2024-07-15', Status:'Rejected',     Last_Updated:'2024-09-30', Rejection_Reason:'Income level insufficient to support child with documented special educational needs',  Priority_Level:'Low',    PAP_ID:12, Child_ID:5,  HCR_ID:12 },
+  ],
+
+  // TABLE 10 : LEGAL_DOCS (15 rows)
+  LEGAL_DOCS: [
+    { Doc_ID:1,  Doc_Type:'Income Certificate',           Verification_Status:'Verified', Issue_Date:'2024-03-20', Expiry_Date:'2025-03-20', Issued_By:'State Revenue Dept, Chennai',      App_ID:1 },
+    { Doc_ID:2,  Doc_Type:'Medical Certificate',          Verification_Status:'Verified', Issue_Date:'2024-03-22', Expiry_Date:'2025-03-22', Issued_By:'Apollo Hospitals, Chennai',        App_ID:1 },
+    { Doc_ID:3,  Doc_Type:'Police Clearance Certificate', Verification_Status:'Verified', Issue_Date:'2024-03-25', Expiry_Date:'2025-03-25', Issued_By:'Chennai City Police Dept',         App_ID:1 },
+    { Doc_ID:4,  Doc_Type:'Income Certificate',           Verification_Status:'Verified', Issue_Date:'2024-05-05', Expiry_Date:'2025-05-05', Issued_By:'State Revenue Dept, Chennai',      App_ID:2 },
+    { Doc_ID:5,  Doc_Type:'Medical Certificate',          Verification_Status:'Verified', Issue_Date:'2024-05-06', Expiry_Date:'2025-05-06', Issued_By:'MIOT Hospital, Chennai',           App_ID:2 },
+    { Doc_ID:6,  Doc_Type:'Police Clearance Certificate', Verification_Status:'Verified', Issue_Date:'2024-05-08', Expiry_Date:'2025-05-08', Issued_By:'Chennai City Police Dept',         App_ID:2 },
+    { Doc_ID:7,  Doc_Type:'Income Certificate',           Verification_Status:'Verified', Issue_Date:'2024-03-01', Expiry_Date:'2025-03-01', Issued_By:'State Revenue Dept, Coimbatore',   App_ID:3 },
+    { Doc_ID:8,  Doc_Type:'Medical Certificate',          Verification_Status:'Verified', Issue_Date:'2024-03-02', Expiry_Date:'2025-03-02', Issued_By:'Kovai Medical Centre, Coimbatore', App_ID:3 },
+    { Doc_ID:9,  Doc_Type:'Marriage Certificate',         Verification_Status:'Verified', Issue_Date:'2024-03-03', Expiry_Date:null,         Issued_By:'Sub-Registrar Office, Coimbatore', App_ID:3 },
+    { Doc_ID:10, Doc_Type:'Police Clearance Certificate', Verification_Status:'Verified', Issue_Date:'2024-03-04', Expiry_Date:'2025-03-04', Issued_By:'Coimbatore City Police Dept',      App_ID:3 },
+    { Doc_ID:11, Doc_Type:'Income Certificate',           Verification_Status:'Verified', Issue_Date:'2024-04-18', Expiry_Date:'2025-04-18', Issued_By:'State Revenue Dept, Trichy',       App_ID:5 },
+    { Doc_ID:12, Doc_Type:'Medical Certificate',          Verification_Status:'Verified', Issue_Date:'2024-04-20', Expiry_Date:'2025-04-20', Issued_By:'Trichy Government Hospital',       App_ID:5 },
+    { Doc_ID:13, Doc_Type:'Income Certificate',           Verification_Status:'Verified', Issue_Date:'2024-02-20', Expiry_Date:'2025-02-20', Issued_By:'State Revenue Dept, Hyderabad',    App_ID:7 },
+    { Doc_ID:14, Doc_Type:'Medical Certificate',          Verification_Status:'Verified', Issue_Date:'2024-02-21', Expiry_Date:'2025-02-21', Issued_By:'Apollo Hospital, Hyderabad',       App_ID:7 },
+    { Doc_ID:15, Doc_Type:'Marriage Certificate',         Verification_Status:'Verified', Issue_Date:'2024-02-22', Expiry_Date:null,         Issued_By:'Sub-Registrar Office, Hyderabad',  App_ID:7 },
+  ],
+
+  // TABLE 11 : POST_ADOPTION_FOLLOWUP (6 rows)
+  POST_ADOPTION_FOLLOWUP: [
+    { Report_ID:1, FollowUp_Date:'2024-07-01', Child_Adjustment_Notes:'Divya shows remarkable social improvement since placement. School integration has been smooth. Daily routine well established.',                                              Parent_Bonding_Notes:'Rajiv and Anita have adapted exceptionally well. Medical background enormously helpful. Deep emotional bond clearly forming.',                Next_FollowUp_Date:'2025-01-01', Overall_Status:'Excellent',  Concerns_Flagged:'None', App_ID:3,  Counselor_ID:2 },
+    { Report_ID:2, FollowUp_Date:'2025-01-05', Child_Adjustment_Notes:'Six-month review: Divya now initiates peer interaction independently. Speech continuing to improve. Home life appears loving and stable.',                                  Parent_Bonding_Notes:'Parents report strong and secure attachment. Anita mentions Divya sings to herself before sleeping every night.',                            Next_FollowUp_Date:'2025-07-05', Overall_Status:'Excellent',  Concerns_Flagged:'None', App_ID:3,  Counselor_ID:2 },
+    { Report_ID:3, FollowUp_Date:'2024-08-15', Child_Adjustment_Notes:'Ishan is thriving in every dimension. Emotional bond with parents is strong. Nutrition and physical milestones being exceeded.',                                           Parent_Bonding_Notes:'Priya and Kiran deeply attached. Very patient, consistent and joyful parenting observed throughout the home visit.',                         Next_FollowUp_Date:'2025-02-15', Overall_Status:'Excellent',  Concerns_Flagged:'None', App_ID:7,  Counselor_ID:2 },
+    { Report_ID:4, FollowUp_Date:'2024-09-01', Child_Adjustment_Notes:'Aditya has settled beautifully into his new home. Happy, expressive and active. No signs of adjustment difficulties whatsoever.',                                         Parent_Bonding_Notes:'Vijay and Sowmya are deeply nurturing. The structured government household provides exceptional security and stability for the child.',       Next_FollowUp_Date:'2025-03-01', Overall_Status:'Very Good', Concerns_Flagged:'None', App_ID:11, Counselor_ID:4 },
+    { Report_ID:5, FollowUp_Date:'2024-09-20', Child_Adjustment_Notes:'Arjun adjusting well. Has joined chess club at school. Emotionally stable, cheerful, and academically on track.',                                                          Parent_Bonding_Notes:'Ramesh and Preethi report natural connection forming. Child has begun referring to them as appa and amma on his own.',                        Next_FollowUp_Date:'2025-03-20', Overall_Status:'Very Good', Concerns_Flagged:'None', App_ID:1,  Counselor_ID:1 },
+    { Report_ID:6, FollowUp_Date:'2024-10-05', Child_Adjustment_Notes:'Rohan integrating well into school life. Sports participation is excellent. Beginning to bond naturally with existing child in family.',                                   Parent_Bonding_Notes:'Suresh reports Rohan already feels like family. They play cricket in the garden every weekend without exception.',                           Next_FollowUp_Date:'2025-04-05', Overall_Status:'Good',      Concerns_Flagged:'Monitor school academic performance - slight dip in grades noted; tutoring suggested', App_ID:5, Counselor_ID:4 },
+  ],
+
+  // TABLE 12 : SYSTEM_RECORDS (7 rows)
+  SYSTEM_RECORDS: [
+    { Record_ID:1, Log_Data:'Child record created: Arjun S registered as Child_ID 1',                           Timestamp:'2024-01-10 09:15:00', Admin_ID:2, Staff_ID:1 },
+    { Record_ID:2, Log_Data:'Adoption application submitted: App_ID 1 by PAP Ramesh and Preethi Kumar',         Timestamp:'2024-04-01 10:30:00', Admin_ID:2, Staff_ID:1 },
+    { Record_ID:3, Log_Data:'HCR report approved: PAP_ID 3 Rajiv and Anita Sharma, score 95',                   Timestamp:'2024-02-25 14:00:00', Admin_ID:3, Staff_ID:4 },
+    { Record_ID:4, Log_Data:'Application status updated to Completed: App_ID 3',                                Timestamp:'2024-09-01 11:00:00', Admin_ID:1, Staff_ID:null },
+    { Record_ID:5, Log_Data:'New PAP registered: Sneha Iyer assigned PAP_ID 2',                                 Timestamp:'2024-04-20 09:00:00', Admin_ID:2, Staff_ID:null },
+    { Record_ID:6, Log_Data:'Donation received: Rs 50000 from Infosys Foundation for Orphanage_ID 1',           Timestamp:'2024-10-15 16:00:00', Admin_ID:4, Staff_ID:null },
+    { Record_ID:7, Log_Data:'Post adoption followup submitted for App_ID 7 by Dr. Arun Prakash',                Timestamp:'2024-08-15 13:30:00', Admin_ID:1, Staff_ID:6  },
+  ],
+
+  // TABLE 13 : DONATION (7 rows)
+  DONATION: [
+    { Donation_ID:1, Amount:50000, Donor_Name:'Infosys Foundation',        Date_Received:'2024-10-15', Payment_Method:'Bank Transfer',   Purpose:'Infrastructure and education materials',       Receipt_Number:'RCP-2024-001', Orphanage_ID:1 },
+    { Donation_ID:2, Amount:25000, Donor_Name:'Rotary Club Chennai',       Date_Received:'2024-09-20', Payment_Method:'Cheque',          Purpose:'Medical supplies and health checkups',         Receipt_Number:'RCP-2024-002', Orphanage_ID:1 },
+    { Donation_ID:3, Amount:35000, Donor_Name:'Anonymous Donor',           Date_Received:'2024-08-05', Payment_Method:'Online Transfer', Purpose:'Food and nutrition program',                   Receipt_Number:'RCP-2024-003', Orphanage_ID:2 },
+    { Donation_ID:4, Amount:15000, Donor_Name:'Mrs. Saraswathi Narayanan', Date_Received:'2024-11-01', Payment_Method:'Cash',            Purpose:'Clothing and school supplies',                 Receipt_Number:'RCP-2024-004', Orphanage_ID:3 },
+    { Donation_ID:5, Amount:75000, Donor_Name:'TCS CSR Program',           Date_Received:'2024-07-25', Payment_Method:'Bank Transfer',   Purpose:'Digital learning equipment',                   Receipt_Number:'RCP-2024-005', Orphanage_ID:3 },
+    { Donation_ID:6, Amount:20000, Donor_Name:'Lions Club Trichy',         Date_Received:'2024-10-30', Payment_Method:'Cheque',          Purpose:'Recreational activities and sports equipment', Receipt_Number:'RCP-2024-006', Orphanage_ID:4 },
+    { Donation_ID:7, Amount:10000, Donor_Name:'Mr. Rajan Sundaram',        Date_Received:'2024-09-10', Payment_Method:'Online Transfer', Purpose:'General operational support',                  Receipt_Number:'RCP-2024-007', Orphanage_ID:5 },
+  ],
+};
+
+// ============================================================
+// STATE  — single source of truth for the logged-in session
+// ============================================================
+let currentUser  = null;   // { PAP_ID, Names, Email, role, ... } or counselor/agency obj
+let currentRole  = null;   // 'parent' | 'agency' | 'counselor' | 'admin'
+let loginRole    = 'parent';
+let regRole      = 'parent';
+let activeFilter = 'all';
+let currentDashTab = 'overview';
+
+// ── DB change log (mirrors SQL audit trail) ─────────────────────────────────
+function dbLog(msg) {
+  DB.SYSTEM_RECORDS.push({
+    Record_ID : DB.SYSTEM_RECORDS.length + 1,
+    Log_Data  : msg,
+    Timestamp : new Date().toLocaleString(),
+    Admin_ID  : null,
+    Staff_ID  : null
+  });
+}
+
+// ── helpers to get current PAP / counselor ──────────────────────────────────
+function getLoggedPAP() {
+  if (!currentUser || currentRole !== 'parent') return null;
+  return DB.PAP.find(p => p.PAP_ID === currentUser.PAP_ID) || null;
+}
+function getLoggedCounselor() {
+  if (!currentUser || currentRole !== 'counselor') return null;
+  return DB.COUNSELOR.find(c => c.Counselor_ID === currentUser.Counselor_ID) || null;
+}
+
+// ============================================================
+// VIEW MANAGEMENT
+// ============================================================
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById('view-' + name);
+  if (el) { el.classList.add('active'); window.scrollTo(0,0); }
+  // Update nav
+  const navActions = document.getElementById('nav-actions');
+  if (['parent-dashboard','agency-dashboard','counselor-dashboard'].includes(name)) {
+    navActions.innerHTML = `<span style="font-size:14px;opacity:0.7">Welcome back 👋</span> <button class="btn-ghost" onclick="logout()">Sign Out</button>`;
+  } else {
+    navActions.innerHTML = `<button class="btn-ghost" onclick="showView('login')">Sign In</button><button class="btn-primary" onclick="showView('register')">Get Started</button>`;
+  }
+  if (name === 'browse') renderChildren();
+  if (name === 'parent-dashboard') renderParentDash('overview');
+  if (name === 'agency-dashboard') renderAgencyDash('overview');
+  if (name === 'counselor-dashboard') {
+    const c = getLoggedCounselor() || DB.COUNSELOR[0];
+    const el1 = document.getElementById('counselor-sidebar-name');
+    const el2 = document.getElementById('counselor-sidebar-spec');
+    if (el1) el1.textContent = c ? c.Name : 'Counselor';
+    if (el2) el2.textContent = c ? c.Specialization : 'Child Psychology';
+    renderCounselorDash('overview');
+  }
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function selectLoginRole(role, el) {
+  loginRole = role;
+  document.querySelectorAll('#login-role-select .role-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function selectRegRole(role, el) {
+  regRole = role;
+  document.querySelectorAll('#reg-role-select .role-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function doLogin() {
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email)    { showToast('Please enter your email address', '⚠️'); return; }
+  if (!password) { showToast('Please enter your password', '⚠️'); return; }
+
+  if (loginRole === 'parent') {
+    const pap = DB.PAP.find(p => p.Email && p.Email.toLowerCase() === email.toLowerCase());
+    if (!pap) { showToast('No PAP account found with that email.', '❌'); return; }
+    currentRole = 'parent';
+    currentUser = { ...pap, role: 'parent' };
+    dbLog('PAP login: ' + pap.Names + ' (PAP_ID ' + pap.PAP_ID + ')');
+    showToast('Welcome back, ' + pap.Names.split(' ')[0] + '! 👋', '👋');
+    setTimeout(() => showView('parent-dashboard'), 800);
+  } else if (loginRole === 'counselor') {
+    const c = DB.COUNSELOR.find(c => c.Email && c.Email.toLowerCase() === email.toLowerCase());
+    if (!c) { showToast('No counselor account found with that email.', '❌'); return; }
+    currentRole = 'counselor';
+    currentUser = { ...c, role: 'counselor' };
+    dbLog('Counselor login: ' + c.Name + ' (ID ' + c.Counselor_ID + ')');
+    showToast('Welcome back, ' + c.Name + '! 👋', '👋');
+    setTimeout(() => showView('counselor-dashboard'), 800);
+  } else if (loginRole === 'agency') {
+    const s = DB.AGENCY_STAFF.find(s => s.Email && s.Email.toLowerCase() === email.toLowerCase());
+    if (!s) { showToast('No agency staff account found with that email.', '❌'); return; }
+    currentRole = 'agency';
+    currentUser = { ...s, role: 'agency' };
+    dbLog('Agency staff login: ' + s.Name + ' (Staff_ID ' + s.Staff_ID + ')');
+    showToast('Welcome back, ' + s.Name + '! 👋', '👋');
+    setTimeout(() => showView('agency-dashboard'), 800);
+  } else {
+    const a = DB.SYSTEM_ADMIN.find(a => a.Email && a.Email.toLowerCase() === email.toLowerCase());
+    if (!a) { showToast('No admin account found with that email.', '❌'); return; }
+    currentRole = 'admin';
+    currentUser = { ...a, role: 'admin' };
+    dbLog('Admin login: ' + a.Username);
+    showToast('Welcome, ' + a.Username + '! 👋', '👋');
+    setTimeout(() => showView('agency-dashboard'), 800);
+  }
+}
+function doRegister() {
+  const firstNameEl = document.querySelector('#view-register input[placeholder="Priya"]');
+  const lastNameEl  = document.querySelector('#view-register input[placeholder="Sharma"]');
+  const emailEl     = document.querySelector('#view-register input[type="email"]');
+  const passEl      = document.querySelectorAll('#view-register input[type="password"]')[0];
+
+  const firstName = firstNameEl ? firstNameEl.value.trim() : '';
+  const lastName  = lastNameEl  ? lastNameEl.value.trim()  : '';
+  const email     = emailEl     ? emailEl.value.trim()     : '';
+  const fullName  = (firstName + ' ' + lastName).trim();
+
+  if (!firstName || !email) { showToast('Please fill in your name and email.', '⚠️'); return; }
+
+  if (regRole === 'parent') {
+    // Check duplicate
+    if (DB.PAP.find(p => p.Email && p.Email.toLowerCase() === email.toLowerCase())) {
+      showToast('An account with that email already exists.', '❌'); return;
+    }
+    const prefAgeMin  = parseInt(document.getElementById('reg-age-min')?.value  || '0');
+    const prefAgeMax  = parseInt(document.getElementById('reg-age-max')?.value  || '14');
+    const prefGender  = document.getElementById('reg-gender')?.value  || 'Any';
+    const marital     = document.getElementById('reg-marital')?.value || 'Married';
+    const occupation  = document.getElementById('reg-occupation')?.value || '';
+    const about       = document.getElementById('reg-about')?.value || '';
+
+    const newPAP = {
+      PAP_ID                  : DB.PAP.length + 1,
+      Names                   : fullName,
+      Address                 : '',
+      Health_Status           : 'Good',
+      Phone                   : '',
+      Email                   : email,
+      Occupation              : occupation,
+      Salary                  : 0,
+      Income_Status           : 'Middle',
+      Marital_Status          : marital,
+      Religion                : '',
+      Preferred_Age_Min       : prefAgeMin,
+      Preferred_Age_Max       : prefAgeMax,
+      Preferred_Gender        : prefGender,
+      Can_Handle_Special_Needs: false,
+      Num_Existing_Children   : 0,
+      Housing_Type            : '',
+      Values_Description      : about,
+      Interests               : '',
+      Languages               : '',
+      Has_Pets                : false,
+      Pet_Types               : null,
+    };
+    DB.PAP.push(newPAP);
+    dbLog('New PAP registered: ' + fullName + ' assigned PAP_ID ' + newPAP.PAP_ID);
+    currentRole = 'parent';
+    currentUser = { ...newPAP, role: 'parent' };
+    showToast('Account created! Welcome, ' + firstName + '! 🎉', '🎉');
+    setTimeout(() => showView('parent-dashboard'), 1000);
+
+  } else if (regRole === 'counselor') {
+    if (DB.COUNSELOR.find(c => c.Email && c.Email.toLowerCase() === email.toLowerCase())) {
+      showToast('A counselor account with that email already exists.', '❌'); return;
+    }
+    const newC = {
+      Counselor_ID        : DB.COUNSELOR.length + 1,
+      Name                : fullName,
+      Specialization      : 'Child Psychology',
+      License_No          : 'LIC-NEW-' + (DB.COUNSELOR.length + 1).toString().padStart(3,'0'),
+      Phone               : '',
+      Email               : email,
+      Years_of_Experience : 0,
+      Assigned_Region     : 'Chennai',
+    };
+    DB.COUNSELOR.push(newC);
+    dbLog('New counselor registered: ' + fullName + ' (ID ' + newC.Counselor_ID + ')');
+    currentRole = 'counselor';
+    currentUser = { ...newC, role: 'counselor' };
+    showToast('Account created! Welcome, ' + firstName + '! 🎉', '🎉');
+    setTimeout(() => showView('counselor-dashboard'), 1000);
+
+  } else if (regRole === 'agency') {
+    if (DB.AGENCY_STAFF.find(s => s.Email && s.Email.toLowerCase() === email.toLowerCase())) {
+      showToast('An agency account with that email already exists.', '❌'); return;
+    }
+    const newStaff = {
+      Staff_ID     : DB.AGENCY_STAFF.length + 1,
+      Name         : fullName,
+      Role         : 'Manager',
+      Phone        : '',
+      Email        : email,
+      Hire_Date    : new Date().toISOString().split('T')[0],
+      Orphanage_ID : 1,
+    };
+    DB.AGENCY_STAFF.push(newStaff);
+    dbLog('New agency staff registered: ' + fullName + ' (ID ' + newStaff.Staff_ID + ')');
+    currentRole = 'agency';
+    currentUser = { ...newStaff, role: 'agency' };
+    showToast('Account created! Welcome, ' + firstName + '! 🎉', '🎉');
+    setTimeout(() => showView('agency-dashboard'), 1000);
+
+  } else {
+    showToast('Admin accounts must be created by a Super Admin.', '❌');
+  }
+}
+function logout() {
+  dbLog((currentUser ? (currentUser.Names || currentUser.Name || currentUser.Username || 'User') : 'User') + ' signed out');
+  currentUser = null; currentRole = null;
+  showToast('Signed out successfully', '👋');
+  setTimeout(() => showView('landing'), 500);
+}
+
+// ============================================================
+// BROWSE CHILDREN
+// ============================================================
+function getAgeGroup(age) {
+  if (age <= 4) return 'toddler';
+  if (age <= 10) return 'child';
+  if (age <= 13) return 'preteen';
+  return 'teen';
+}
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('#filter-btns .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderChildren();
+}
+function filterChildren() { renderChildren(); }
+function renderChildren(container='children-grid') {
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  let children = DB.CHILD.filter(c => {
+    const matchFilter = activeFilter === 'all'
+      || (activeFilter === 'legal' && c.Is_Legally_Free)
+      || getAgeGroup(c.Age) === activeFilter;
+    const matchQuery = !query
+      || c.Name.toLowerCase().includes(query)
+      || c.interests.some(i => i.toLowerCase().includes(query))
+      || String(c.Age).includes(query);
+    return matchFilter && matchQuery;
+  });
+
+  const grid = document.getElementById(container);
+  if (!grid) return;
+  if (!children.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>No children found matching your search.</p></div>`;
+    return;
+  }
+  grid.innerHTML = children.map(c => {
+    const score = getCompatScore(c);
+    const tagColors = ['', 'sage', 'sky', '', 'sage'];
+    const tagsHtml = c.interests.map((t,i) => `<span class="tag ${tagColors[i%tagColors.length]}">${t}</span>`).join('');
+    return `
+    <div class="child-card" onclick="openChildModal(${c.Child_ID})">
+      <div class="child-avatar" style="background:linear-gradient(135deg,${c.color}44,${c.color}99)">
+        ${c.emoji}
+        ${c.Is_Legally_Free ? '<span style="position:absolute;top:14px;right:14px;background:var(--sage);color:white;font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:20px;text-transform:uppercase;">Legally Free</span>' : ''}
+      </div>
+      <div class="child-card-body">
+        <div class="child-name">${c.Name}</div>
+        <div class="child-meta">${c.Age} years old · ${c.Gender} · ${getOrphanage(c.Orphanage_ID)}</div>
+        <div class="child-tags">${tagsHtml}</div>
+        <div class="compatibility-bar">
+          <span>Compatibility</span>
+          <div class="bar-track"><div class="bar-fill" style="width:${score}%"></div></div>
+          <span><b>${score}%</b></span>
+        </div>
+        <button class="btn-view">View Profile & Apply</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function getOrphanage(id) {
+  const o = DB.ORPHANAGE.find(o => o.Orphanage_ID === id);
+  return o ? o.Location.split(',')[0] : 'Unknown';
+}
+function getOrphanageFull(id) {
+  const o = DB.ORPHANAGE.find(o => o.Orphanage_ID === id);
+  return o ? o.Name + ', ' + o.Location : 'Unknown';
+}
+function getCounselor(id) {
+  const c = DB.COUNSELOR.find(c => c.Counselor_ID === id);
+  return c ? c.Name + ' (' + c.Specialization + ')' : 'Unknown';
+}
+function getCWC(id) {
+  const c = DB.CWC.find(c => c.CWC_ID === id);
+  return c ? c.District_Name + ' — ' + c.Officer_In_Charge : 'Unknown';
+}
+
+// ============================================================
+// CHILD MODAL
+// ============================================================
+function openChildModal(id) {
+  const c = DB.CHILD.find(ch => ch.Child_ID === id);
+  if (!c) return;
+  const score = getCompatScore(c);
+  const isLoggedIn = currentRole === 'parent';
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header">
+      <div>
+        <h2>${c.Name}'s Profile</h2>
+        <p style="font-size:14px;opacity:0.55;margin-top:4px">${c.Age} years · ${c.Gender} · Child ID: ${c.Child_ID}</p>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-avatar" style="background:linear-gradient(135deg,${c.color}55,${c.color}aa)">${c.emoji}</div>
+      <div class="info-grid">
+        <div class="info-item"><label>Age</label><p>${c.Age} years old</p></div>
+        <div class="info-item"><label>Gender</label><p>${c.Gender}</p></div>
+        <div class="info-item"><label>Legal Status</label><p style="color:${c.Is_Legally_Free?'var(--sage)':'var(--gold)'};">${c.Is_Legally_Free ? '✅ Legally Free for Adoption' : '⏳ Process Ongoing'}</p></div>
+        <div class="info-item"><label>Health Status</label><p>${c.Health_Status}</p></div>
+        <div class="info-item"><label>Orphanage</label><p>${getOrphanage(c.Orphanage_ID)}</p></div>
+        <div class="info-item"><label>Special Needs</label><p>${c.Special_Needs && c.Special_Needs !== 'None' ? c.Special_Needs : 'None reported'}</p></div>
+      </div>
+      <div class="modal-section-title">Interests & Personality</div>
+      <div class="child-tags" style="margin-bottom:12px">${c.interests.map(i=>`<span class="tag">${i}</span>`).join('')}</div>
+      <p class="long-text"><b>Personality:</b> ${c.Personality_Traits}</p>
+      <p class="long-text" style="margin-top:6px"><b>Languages:</b> ${c.Language}${c.Second_Language ? ', ' + c.Second_Language : ''} · <b>Religion:</b> ${c.Religion} · <b>Education:</b> ${c.Education_Level}</p>
+      <div class="modal-section-title">Compatibility Score</div>
+      <div class="compatibility-bar" style="margin-bottom:0">
+        <span style="font-size:14px">Your match</span>
+        <div class="bar-track" style="height:10px"><div class="bar-fill" style="width:${score}%"></div></div>
+        <span style="font-size:18px;font-weight:700;color:var(--rust)">${score}%</span>
+      </div>
+      <div class="modal-section-title">Counselor Notes & Background</div>
+      <div class="note-card">
+        <div class="note-author">🧑‍⚕️ Psychologist Assessment — ${c.Religion} · Siblings: ${c.Siblings_Count}</div>
+        <div class="note-text">${c.Personality_Traits}. Known family background: ${c.Known_Family}.</div>
+      </div>
+      ${c.Special_Needs && c.Special_Needs !== 'None' ? '<div class="note-card" style="border-color:rgba(201,169,110,0.4);background:rgba(201,169,110,0.08)"><div class="note-author">⚕️ Medical Note</div><div class="note-text">' + c.Special_Needs + '</div></div>' : ''}
+      <div style="margin-top:24px">
+        ${isLoggedIn
+          ? `<button class="btn-submit" onclick="applyForChild(${c.Child_ID},'${c.Name}')">Apply to Adopt ${c.Name}</button>`
+          : `<button class="btn-submit" onclick="closeModal();showView('login')">Sign In to Apply</button><p style="text-align:center;font-size:13px;opacity:0.55;margin-top:12px">You need an account to submit an adoption application.</p>`
+        }
+      </div>
+    </div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.add('hidden');
+}
+function applyForChild(id, name) {
+  const pap = getLoggedPAP();
+  if (!pap) { showToast('Please sign in as a parent to apply.', '⚠️'); closeModal(); return; }
+  const existing = DB.ADOPTION_APPLICATION.find(a => a.Child_ID === id && a.PAP_ID === pap.PAP_ID);
+  if (existing) { showToast(`You already applied for ${name}!`, 'ℹ️'); closeModal(); return; }
+  const newHCR = DB.HCR.find(h => h.PAP_ID === pap.PAP_ID);
+  const newApp = {
+    App_ID          : DB.ADOPTION_APPLICATION.length + 1,
+    Submission_Date : new Date().toISOString().split('T')[0],
+    Status          : 'Pending',
+    Last_Updated    : new Date().toISOString().split('T')[0],
+    Rejection_Reason: null,
+    Priority_Level  : 'Medium',
+    PAP_ID          : pap.PAP_ID,
+    Child_ID        : id,
+    HCR_ID          : newHCR ? newHCR.HCR_ID : null,
+  };
+  DB.ADOPTION_APPLICATION.push(newApp);
+  dbLog(`Application #${newApp.App_ID} submitted for Child ${id} (${name}) by PAP ${pap.Names} (PAP_ID ${pap.PAP_ID})`);
+  closeModal();
+  showToast(`Application for ${name} submitted! ✨`, '🎉');
+}
+
+// ============================================================
+// PARENT DASHBOARD
+// ============================================================
+function showDashTab(tab) {
+  currentDashTab = tab;
+  document.querySelectorAll('#view-parent-dashboard .sidebar-item').forEach(b => {
+    const onclick = b.getAttribute('onclick') || '';
+    const match = onclick.match(/showDashTab\('([^']+)'\)/);
+    if (match) b.classList.toggle('active', match[1] === tab);
+    else b.classList.remove('active');
+  });
+  renderParentDash(tab);
+}
+function renderParentDash(tab) {
+  const main = document.getElementById('dash-main-content');
+  const loggedPAP = getLoggedPAP() || DB.PAP[0];
+  const firstName = loggedPAP.Names.split(' ')[0];
+  document.getElementById('dash-user-name').textContent = firstName;
+
+  if (tab === 'overview') {
+    const apps = DB.ADOPTION_APPLICATION.filter(a => a.PAP_ID === loggedPAP.PAP_ID);
+    const hcrCount = DB.HCR.filter(h => h.PAP_ID === loggedPAP.PAP_ID).length;
+    const docCount = DB.LEGAL_DOCS.filter(d => DB.ADOPTION_APPLICATION.some(a => a.App_ID === d.App_ID && a.PAP_ID === loggedPAP.PAP_ID)).length;
+    main.innerHTML = `
+      <div class="dash-header">
+        <h2>Good morning, ${firstName} 🌸</h2>
+        <p>Here's what's happening with your adoption journey</p>
+      </div>
+      <div class="dash-cards">
+        <div class="dash-card"><div class="number">${apps.length}</div><div class="label">Applications Filed</div><div class="trend">↑ Active</div></div>
+        <div class="dash-card"><div class="number">${DB.CHILD.filter(c=>c.Is_Legally_Free).length}</div><div class="label">Children Available</div><div class="trend">Updated today</div></div>
+        <div class="dash-card"><div class="number">${hcrCount}</div><div class="label">HCR Reports</div><div class="trend" style="color:var(--sage)">${hcrCount > 0 ? '✅ On file' : 'Pending'}</div></div>
+        <div class="dash-card"><div class="number">${docCount}</div><div class="label">Documents</div><div class="trend" style="color:var(--gold)">${docCount > 0 ? 'On file' : 'None yet'}</div></div>
+      </div>
+
+      <div class="dash-section-title">Your Applications</div>
+      <div class="app-list">
+        ${apps.map(app => {
+          const child = DB.CHILD.find(c => c.Child_ID === app.Child_ID);
+          if (!child) return '';
+          const statusClass = app.Status.includes('Review') ? 'status-review' : app.Status === 'Approved' ? 'status-approved' : app.Status === 'Pending Counselling' ? 'status-pending' : 'status-pending';
+          return `
+          <div class="app-item">
+            <div class="app-child-avatar" style="background:linear-gradient(135deg,${child.color}44,${child.color}88)">${child.emoji}</div>
+            <div class="app-info">
+              <h4>${child.Name}, Age ${child.Age}</h4>
+              <p>Applied: ${app.Submission_Date} · App ID: #${app.App_ID}</p>
+              <div class="progress-track" style="margin-top:14px">
+                ${['Applied','Documents','Counselling','Review','Decision'].map((s,i)=>{
+                  const done = i < 2; const active = i === 2;
+                  return `<div class="prog-step"><div class="prog-dot ${done?'done':active?'active':''}">${done?'✓':i+1}</div><div class="prog-label">${s}</div></div>`;
+                }).join('')}
+              </div>
+            </div>
+            <div>
+              <span class="app-status ${statusClass}">${app.Status}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+
+      <div class="dash-section-title" style="margin-top:40px">Suggested Matches</div>
+      <div class="children-grid" id="dash-suggested"></div>`;
+    const sugg = DB.CHILD.filter(c => c.Is_Legally_Free).slice(0,3);
+    setTimeout(() => {
+      const el = document.getElementById('dash-suggested');
+      if (el) {
+        const prev = activeFilter; activeFilter = 'all';
+        el.innerHTML = sugg.map(c => {
+          const score = getCompatScore(c);
+          return `<div class="child-card" onclick="openChildModal(${c.Child_ID})" style="cursor:pointer">
+            <div class="child-avatar" style="background:linear-gradient(135deg,${c.color}44,${c.color}99)">${c.emoji}</div>
+            <div class="child-card-body">
+              <div class="child-name">${c.Name}</div>
+              <div class="child-meta">${c.Age} yrs · ${c.Gender}</div>
+              <div class="child-tags">${c.interests.slice(0,2).map(i=>`<span class="tag">${i}</span>`).join('')}</div>
+              <div class="compatibility-bar"><span>Match</span><div class="bar-track"><div class="bar-fill" style="width:${score}%"></div></div><span><b>${score}%</b></span></div>
+              <button class="btn-view">View Profile</button>
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }, 100);
+  }
+  else if (tab === 'browse-dash') {
+    activeFilter = 'all';
+    main.innerHTML = `
+      <div class="dash-header"><h2>Browse Children</h2><p>Find your emotional match</p></div>
+      <div class="search-bar"><input class="search-input" type="text" id="dash-search-input" placeholder="Search by name or interest..." oninput="renderDashChildren()"/></div>
+      <div class="filters" id="dash-filter-btns">
+        <button class="filter-btn active" onclick="setDashFilter('all',this)">All Children</button>
+        <button class="filter-btn" onclick="setDashFilter('toddler',this)">Toddlers</button>
+        <button class="filter-btn" onclick="setDashFilter('child',this)">Children</button>
+        <button class="filter-btn" onclick="setDashFilter('preteen',this)">Pre-teens</button>
+        <button class="filter-btn" onclick="setDashFilter('teen',this)">Teens</button>
+        <button class="filter-btn" onclick="setDashFilter('legal',this)">Legally Free</button>
+      </div>
+      <div class="children-grid" id="dash-children-grid"></div>`;
+    setTimeout(() => renderDashChildren(), 50);
+  }
+  else if (tab === 'applications') {
+    const apps = DB.ADOPTION_APPLICATION.filter(a => a.PAP_ID === loggedPAP.PAP_ID);
+    main.innerHTML = `
+      <div class="dash-header"><h2>My Applications</h2><p>Track all your adoption applications</p></div>
+      <div class="app-list">
+        ${apps.map(app => {
+          const child = DB.CHILD.find(c => c.Child_ID === app.Child_ID);
+          const statusMap = {Pending:'status-pending','Under Review':'status-review','Pending Counselling':'status-pending',Approved:'status-approved'};
+          return `<div class="app-item">
+            <div class="app-child-avatar" style="background:linear-gradient(135deg,${child.color}44,${child.color}88)">${child.emoji}</div>
+            <div class="app-info">
+              <h4>${child.Name} — Age ${child.Age}</h4>
+              <p>Application #${app.App_ID} · Submitted ${app.Submission_Date}</p>
+              <div class="progress-track" style="margin-top:12px">
+                ${['Applied','Docs','Counselling','Agency Review','Decision'].map((s,i)=>{
+                  const stepDone = app.Status === 'Approved' ? true : (app.Status.includes('Counselling') ? i < 1 : i < 2);
+                  const stepActive = app.Status.includes('Counselling') ? i === 1 : i === 2;
+                  return `<div class="prog-step"><div class="prog-dot ${stepDone?'done':stepActive?'active':''}">${stepDone?'✓':i+1}</div><div class="prog-label" style="font-size:10px">${s}</div></div>`;
+                }).join('')}
+              </div>
+            </div>
+            <span class="app-status ${statusMap[app.Status]||'status-pending'}">${app.Status}</span>
+          </div>`;
+        }).join('')}
+        ${!apps.length ? '<div class="empty-state"><div class="icon">📋</div><p>No applications yet. Browse children to get started!</p></div>' : ''}
+      </div>`;
+  }
+  else if (tab === 'profile') {
+    const hcr = DB.HCR.find(h => h.PAP_ID === loggedPAP.PAP_ID);
+    main.innerHTML = `
+      <div class="dash-header"><h2>My Profile</h2><p>Your prospective parent information</p></div>
+      <div style="background:var(--card-bg);border-radius:var(--radius);padding:32px;border:1px solid var(--border);max-width:600px">
+        <div style="display:flex;align-items:center;gap:20px;margin-bottom:28px">
+          <div class="user-avatar" style="width:72px;height:72px;font-size:32px">👨‍👩‍👧</div>
+          <div>
+            <h3 style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--deep)">${loggedPAP.Names}</h3>
+            <p style="opacity:0.6;font-size:14px">PAP ID: #${loggedPAP.PAP_ID} · ${loggedPAP.Address}</p>
+          </div>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><label>Income Status</label><p>${loggedPAP.Income_Status}</p></div>
+          <div class="info-item"><label>Health Status</label><p>${loggedPAP.Health_Status}</p></div>
+          <div class="info-item"><label>Preferred Age</label><p>${loggedPAP.Preferred_Age_Min}–${loggedPAP.Preferred_Age_Max} years (${loggedPAP.Preferred_Gender})</p></div>
+          <div class="info-item"><label>Marital Status</label><p>${loggedPAP.Marital_Status}</p></div>
+          <div class="info-item"><label>Occupation</label><p>${loggedPAP.Occupation}</p></div>
+          <div class="info-item"><label>Languages</label><p>${loggedPAP.Languages}</p></div>
+          <div class="info-item"><label>Housing</label><p>${loggedPAP.Housing_Type}</p></div>
+          <div class="info-item"><label>Handles Special Needs</label><p>${loggedPAP.Can_Handle_Special_Needs ? '✅ Yes' : 'No'}</p></div>
+        </div>
+        <div class="divider"></div>
+        <p class="modal-section-title">Home Study Report (HCR)</p>
+        ${hcr ? `<div class="note-card">
+          <div class="note-author">Visit Date: ${hcr.Visit_Date} · Counselor: ${getCounselor(hcr.Counselor_ID)} · Score: ${hcr.Home_Environment_Score}/100 · ${hcr.House_Size}</div>
+          <div class="note-text">${hcr.Psychologist_Notes}</div>
+          <p style="margin-top:10px;font-size:13px;font-weight:600;color:var(--sage)">Safety Score: ${hcr.Safety_Score}/100 · Neighbourhood: ${hcr.Neighborhood_Type} · Status: ✅ ${hcr.Approval_Status}</p>
+        </div>` : '<p style="opacity:0.5">No HCR conducted yet.</p>'}
+      </div>`;
+  }
+  else if (tab === 'documents') {
+    const docs = DB.LEGAL_DOCS.filter(d => DB.ADOPTION_APPLICATION.some(a => a.App_ID === d.App_ID && a.PAP_ID === loggedPAP.PAP_ID));
+    main.innerHTML = `
+      <div class="dash-header"><h2>Legal Documents</h2><p>Required documents for your adoption application</p></div>
+      <table class="data-table" style="background:var(--card-bg);border-radius:var(--radius);overflow:hidden">
+        <thead><tr><th>Document Type</th><th>Application</th><th>Verification Status</th><th>Action</th></tr></thead>
+        <tbody>
+          ${docs.map(d => `<tr>
+            <td><b>${d.Doc_Type}</b></td>
+            <td>App #${d.App_ID}</td>
+            <td><span class="app-status ${d.Verification_Status==='Verified'?'status-approved':'status-pending'}">${d.Verification_Status}</span></td>
+            <td><button class="btn-ghost" style="padding:6px 14px;font-size:12px" onclick="viewDocument(${d.Doc_ID})">${d.Verification_Status==='Verified'?'📄 View':'⬆ Upload'}</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+  else if (tab === 'resources') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Educational Resources</h2><p>Prepare yourself for the adoption journey</p></div>
+      <div class="features-grid">
+        ${[
+          {icon:'💝',title:'Bonding with Older Children',desc:'Expert guides on building attachment and trust with children who have experienced care systems.'},
+          {icon:'🧠',title:'Understanding Childhood Trauma',desc:'Learn about the long-term effects of early trauma and how to create a healing environment at home.'},
+          {icon:'📖',title:'Adoption FAQ',desc:'Answers to the most common questions prospective parents have about the adoption process in India.'},
+          {icon:'🌿',title:'Creating Safe Spaces',desc:'How to design your home and routines to help a child feel secure, seen, and loved.'},
+          {icon:'💬',title:'Communication Strategies',desc:'Age-appropriate ways to talk about adoption, identity, and belonging with your child.'},
+          {icon:'🤝',title:'Post-Adoption Community',desc:'Connect with other adoptive families for peer support, shared experiences, and advice.'},
+        ].map(r=>`<div class="feature-card"><div class="feature-icon">${r.icon}</div><h3>${r.title}</h3><p>${r.desc}</p></div>`).join('')}
+      </div>`;
+  }
+  else if (tab === 'messages') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Messages</h2><p>Secure communication with agency staff</p></div>
+      <div style="background:var(--card-bg);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden">
+        <div style="padding:20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <b>Agency — FamLink Bangalore</b>
+          <span class="app-status status-review">Verified Channel</span>
+        </div>
+        ${[
+          {from:'Agency',msg:'Your HCR has been approved. Please schedule your counselling session at your earliest convenience.',time:'Jan 12, 2026'},
+          {from:'You',msg:'Thank you! We would like to schedule for the week of January 20th.',time:'Jan 13, 2026'},
+          {from:'Agency',msg:'Confirmed. Your counselling session is scheduled for January 22nd at 10:00 AM. We look forward to meeting you.',time:'Jan 14, 2026'},
+        ].map(m=>`
+          <div style="padding:16px 20px;display:flex;gap:14px;align-items:flex-start;${m.from==='You'?'flex-direction:row-reverse;text-align:right':''}">
+            <div style="width:36px;height:36px;border-radius:50%;background:${m.from==='You'?'var(--terracotta)':'var(--sage)'};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${m.from==='You'?'👩':'🏢'}</div>
+            <div style="max-width:420px">
+              <p style="font-size:11px;opacity:0.5;margin-bottom:4px">${m.from} · ${m.time}</p>
+              <div style="background:${m.from==='You'?'var(--rust)':'rgba(196,122,90,0.1)'};color:${m.from==='You'?'white':'var(--charcoal)'};padding:12px 16px;border-radius:12px;font-size:14px;line-height:1.6">${m.msg}</div>
+            </div>
+          </div>`).join('')}
+        <div style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:12px" id="msg-input-row">
+          <input class="search-input" id="msg-input" style="flex:1" placeholder="Type your message... (Moderated by agency staff)" onkeydown="if(event.key==='Enter')sendMessage()"/>
+          <button class="btn-primary" style="border-radius:10px;padding:0 20px" onclick="sendMessage()">Send</button>
+        </div>
+      </div>`;
+  }
+}
+
+// ============================================================
+// AGENCY DASHBOARD
+// ============================================================
+function showAgencyTab(tab) {
+  document.querySelectorAll('#view-agency-dashboard .sidebar-item').forEach((b,i) => {
+    const tabs = ['overview','children','applications','parents','donations'];
+    b.classList.toggle('active', tabs[i] === tab);
+  });
+  renderAgencyDash(tab);
+}
+function renderAgencyDash(tab) {
+  const main = document.getElementById('agency-main-content');
+  if (tab === 'overview') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Agency Dashboard</h2><p>Manage children, applications, and operations</p></div>
+      <div class="dash-cards">
+        <div class="dash-card"><div class="number">${DB.CHILD.length}</div><div class="label">Total Children</div><div class="trend">↑ 3 this month</div></div>
+        <div class="dash-card"><div class="number">${DB.CHILD.filter(c=>c.Is_Legally_Free).length}</div><div class="label">Legally Free</div><div class="trend" style="color:var(--sage)">Ready for adoption</div></div>
+        <div class="dash-card"><div class="number">${DB.ADOPTION_APPLICATION.length}</div><div class="label">Applications</div><div class="trend" style="color:var(--gold)">2 need review</div></div>
+        <div class="dash-card"><div class="number">${DB.ORPHANAGE.length}</div><div class="label">Partner Orphanages</div><div class="trend">All active</div></div>
+      </div>
+      <div class="dash-section-title">Recent Applications</div>
+      <table class="data-table" style="background:var(--card-bg);border-radius:var(--radius);overflow:hidden">
+        <thead><tr><th>App ID</th><th>Child</th><th>PAP</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          ${DB.ADOPTION_APPLICATION.map(a=>{
+            const child=DB.CHILD.find(c=>c.Child_ID===a.Child_ID);
+            const pap=DB.PAP.find(p=>p.PAP_ID===a.PAP_ID);
+            const statusClass=a.Status.includes('Review')?'status-review':a.Status==='Approved'?'status-approved':'status-pending';
+            return `<tr>
+              <td><b>#${a.App_ID}</b></td>
+              <td>${child?child.emoji+' '+child.Name:'—'}</td>
+              <td>${pap?pap.Names:'—'}</td>
+              <td>${a.Submission_Date}</td>
+              <td><span class="app-status ${statusClass}">${a.Status}</span></td>
+              <td><button class="btn-ghost" style="padding:6px 14px;font-size:12px" onclick="updateAppStatus(${a.App_ID})">Review</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }
+  else if (tab === 'children') {
+    main.innerHTML = `
+      <div class="dash-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><h2>Manage Children</h2><p>Child profiles registered in the system</p></div>
+          <button class="btn-primary" onclick="openAddChildModal()">+ Add Child</button>
+        </div>
+      </div>
+      <table class="data-table" style="background:var(--card-bg);border-radius:var(--radius);overflow:hidden">
+        <thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Legal Status</th><th>Orphanage</th><th>Action</th></tr></thead>
+        <tbody>
+          ${DB.CHILD.map(c=>`<tr>
+            <td>#${c.Child_ID}</td>
+            <td><b>${c.emoji} ${c.Name}</b></td>
+            <td>${c.Age}</td>
+            <td>${c.Gender}</td>
+            <td><span class="app-status ${c.Is_Legally_Free?'status-approved':'status-pending'}">${c.Is_Legally_Free?'Legally Free':'Pending'}</span></td>
+            <td>${getOrphanage(c.Orphanage_ID)}</td>
+            <td><button class="btn-ghost" style="padding:6px 14px;font-size:12px" onclick="openChildModal(${c.Child_ID})">View</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+  else if (tab === 'applications') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Applications</h2><p>Review and manage adoption applications</p></div>
+      <div class="app-list">
+        ${DB.ADOPTION_APPLICATION.map(a=>{
+          const child=DB.CHILD.find(c=>c.Child_ID===a.Child_ID);
+          const pap=DB.PAP.find(p=>p.PAP_ID===a.PAP_ID);
+          const statusMap={'Under Review':'status-review','Approved':'status-approved','Pending Counselling':'status-pending','Pending':'status-pending'};
+          return `<div class="app-item">
+            <div class="app-child-avatar" style="background:linear-gradient(135deg,${child?child.color+'44':'#eee'},${child?child.color+'88':'#ccc'})">${child?child.emoji:'📋'}</div>
+            <div class="app-info">
+              <h4>App #${a.App_ID}: ${child?child.Name:'Unknown'} ↔ ${pap?pap.Names:'Unknown'}</h4>
+              <p>Submitted: ${a.Submission_Date}</p>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+              <span class="app-status ${statusMap[a.Status]||'status-pending'}">${a.Status}</span>
+              <button class="btn-ghost" style="padding:6px 14px;font-size:12px" onclick="updateAppStatus(${a.App_ID})">Update Status</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }
+  else if (tab === 'donations') {
+    const total = DB.DONATION.reduce((s,d)=>s+d.Amount,0);
+    main.innerHTML = `
+      <div class="dash-header"><h2>Donations</h2><p>Track all orphanage donations</p></div>
+      <div class="dash-cards" style="grid-template-columns:repeat(3,1fr)">
+        <div class="dash-card"><div class="number">₹${total.toLocaleString()}</div><div class="label">Total Donations</div></div>
+        <div class="dash-card"><div class="number">${DB.DONATION.length}</div><div class="label">Donors</div></div>
+        <div class="dash-card"><div class="number">${DB.ORPHANAGE.length}</div><div class="label">Benefiting Orphanages</div></div>
+      </div>
+      <table class="data-table" style="background:var(--card-bg);border-radius:var(--radius);overflow:hidden;margin-top:24px">
+        <thead><tr><th>ID</th><th>Donor</th><th>Amount</th><th>Orphanage</th><th>Date</th><th>Method</th><th>Receipt</th></tr></thead>
+        <tbody>
+          ${DB.DONATION.map(d=>`<tr>
+            <td>#${d.Donation_ID}</td>
+            <td>${d.Donor_Name}</td>
+            <td style="color:var(--sage);font-weight:600">₹${d.Amount.toLocaleString()}</td>
+            <td>${getOrphanage(d.Orphanage_ID)}</td>
+            <td>${d.Date_Received}</td>
+            <td style="opacity:0.6;font-size:12px">${d.Payment_Method}</td>
+            <td style="opacity:0.6;font-size:12px">${d.Receipt_Number}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+  else if (tab === 'parents') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Parent Profiles</h2><p>All registered prospective adoptive parents</p></div>
+      <div class="app-list">
+        ${DB.PAP.map(p=>`<div class="app-item">
+          <div class="user-avatar" style="width:52px;height:52px;font-size:22px;flex-shrink:0">👨‍👩‍👧</div>
+          <div class="app-info">
+            <h4>${p.Names}</h4>
+            <p>PAP ID: #${p.PAP_ID} · ${p.Address} · ${p.Occupation} · Income: ${p.Income_Status} · Age pref: ${p.Preferred_Age_Min}–${p.Preferred_Age_Max} yrs · Special Needs: ${p.Can_Handle_Special_Needs?'Yes':'No'}</p>
+          </div>
+          <span class="app-status status-approved">Verified</span>
+        </div>`).join('')}
+      </div>`;
+  }
+}
+
+function updateAppStatus(appId) {
+  const app = DB.ADOPTION_APPLICATION.find(a=>a.App_ID===appId);
+  if (!app) return;
+  const statuses = ['Pending','Under Review','Pending Counselling','Approved'];
+  const idx = statuses.indexOf(app.Status);
+  app.Status = statuses[(idx+1)%statuses.length];
+  const updater = currentUser ? (currentUser.Name || currentUser.Names || 'Agency') : 'Agency';
+  dbLog(`App #${appId} status changed to '${app.Status}' by ${updater}`);
+  showToast(`Application #${appId} status updated to: ${app.Status}`, '📋');
+  renderAgencyDash('applications');
+}
+
+function openAddChildModal() {
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header">
+      <h2>Add Child Profile</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Child Name</label><input type="text" id="nc-name" placeholder="Aarav"/></div>
+        <div class="form-group"><label>Age</label><input type="number" id="nc-age" min="0" max="18" placeholder="8"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Gender</label><select id="nc-gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="form-group"><label>Orphanage</label><select id="nc-orphanage">${DB.ORPHANAGE.map(o=>`<option value="${o.Orphanage_ID}">${o.Location}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-group"><label>Health Status</label><select id="nc-health"><option>Excellent</option><option>Good</option><option>Fair</option></select></div>
+      <div class="form-group"><label>Legally Free for Adoption?</label><select id="nc-legal"><option value="true">Yes</option><option value="false">No</option></select></div>
+      <div class="form-group"><label>Interests (comma separated)</label><input type="text" id="nc-interests" placeholder="Drawing, Football, Reading"/></div>
+      <div class="form-group"><label>Counselor Notes</label><textarea id="nc-notes" placeholder="Enter behavioral, emotional, and developmental notes..."></textarea></div>
+      <button class="btn-submit" onclick="addChild()">Add Child to System</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function addChild() {
+  const name = document.getElementById('nc-name').value;
+  const age = parseInt(document.getElementById('nc-age').value);
+  if (!name || !age) { showToast('Please fill all required fields', '⚠️'); return; }
+  const emojis = ['🧒','👦','👧','🧒‍♀️'];
+  const colors = ['#E8C4B0','#C4D9C8','#B0CDD9','#D9C4B0','#C9B0D9'];
+  const newChild = {
+    Child_ID: DB.CHILD.length + 1,
+    Name: name, Age: age,
+    Gender: document.getElementById('nc-gender').value,
+    Is_Legally_Free: document.getElementById('nc-legal').value === 'true',
+    Orphanage_ID: parseInt(document.getElementById('nc-orphanage').value),
+    interests: document.getElementById('nc-interests').value.split(',').map(s=>s.trim()).filter(Boolean),
+    emotionTag: 'Registered',
+    color: colors[DB.CHILD.length % colors.length],
+    emoji: emojis[DB.CHILD.length % emojis.length],
+    counselorNotes: document.getElementById('nc-notes').value || 'Notes pending counselor review.',
+    health: document.getElementById('nc-health').value,
+    specialNeeds: false,
+  };
+  DB.CHILD.push(newChild);
+  const staffName = currentUser ? (currentUser.Name || currentUser.Names || 'Agency Staff') : 'Agency Staff';
+  dbLog(`Child ${name} (Child_ID ${newChild.Child_ID}) added by ${staffName}`);
+  closeModal();
+  showToast(`${name} added to the system! ✅`, '👶');
+  showAgencyTab('children');
+}
+
+// ============================================================
+// COUNSELOR DASHBOARD
+// ============================================================
+function showCounselorTab(tab) {
+  document.querySelectorAll('#view-counselor-dashboard .sidebar-item').forEach((b,i) => {
+    const tabs = ['overview','hcr','followup','children-notes'];
+    b.classList.toggle('active', tabs[i] === tab);
+  });
+  renderCounselorDash(tab);
+}
+function renderCounselorDash(tab) {
+  const main = document.getElementById('counselor-main-content');
+  if (tab === 'overview') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Counselor Dashboard</h2><p>Home study reports and post-adoption follow-ups</p></div>
+      <div class="dash-cards" style="grid-template-columns:repeat(3,1fr)">
+        <div class="dash-card"><div class="number">${DB.HCR.length}</div><div class="label">HCRs Prepared</div><div class="trend">↑ Active</div></div>
+        <div class="dash-card"><div class="number">${DB.POST_ADOPTION_FOLLOWUP.length}</div><div class="label">Follow-up Reports</div><div class="trend">Recent</div></div>
+        <div class="dash-card"><div class="number">${DB.CHILD.length}</div><div class="label">Children Monitored</div></div>
+      </div>
+      <div class="dash-section-title">Recent Home Study Reports</div>
+      ${DB.HCR.map(h=>{
+        const pap=DB.PAP.find(p=>p.PAP_ID===h.PAP_ID);
+        return `<div class="app-item">
+          <div class="user-avatar" style="font-size:22px;flex-shrink:0">🏠</div>
+          <div class="app-info">
+            <h4>HCR #${h.HCR_ID} — ${pap?pap.Names:'Unknown PAP'}</h4>
+            <p>Visit: ${h.Visit_Date} · Score: ${h.Home_Environment_Score}/100 · Safety: ${h.Safety_Score}/100 · ${h.House_Size} · ${h.Neighborhood_Type}</p>
+            <p style="font-size:13px;opacity:0.7;margin-top:6px">${h.Psychologist_Notes}</p>
+          </div>
+          <span class="app-status ${h.Approval_Status==='Approved'?'status-approved':'status-pending'}">${h.Approval_Status}</span>
+        </div>`;
+      }).join('')}`;
+  }
+  else if (tab === 'hcr') {
+    main.innerHTML = `
+      <div class="dash-header">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><h2>Home Study Reports</h2><p>All HCR records in the system</p></div>
+          <button class="btn-primary" onclick="openHCRModal()">+ New HCR</button>
+        </div>
+      </div>
+      <div class="app-list">
+        ${DB.HCR.map(h=>{
+          const pap=DB.PAP.find(p=>p.PAP_ID===h.PAP_ID);
+          return `<div class="app-item">
+            <div class="user-avatar" style="font-size:24px">🏠</div>
+            <div class="app-info">
+              <h4>HCR #${h.HCR_ID} — ${pap?pap.Names:'Unknown'}</h4>
+              <p>Visit Date: ${h.Visit_Date}</p>
+              <p style="margin-top:6px;font-size:13px;opacity:0.7">${h.Psychologist_Notes}</p>
+              <p style="margin-top:4px;font-size:12px;color:var(--gold)">Score: ${h.Home_Environment_Score}/100 · Safety: ${h.Safety_Score}/100 · Counselor: ${getCounselor(h.Counselor_ID)}</p>
+            </div>
+            <span class="app-status ${h.Approval_Status==='Approved'?'status-approved':'status-pending'}">${h.Approval_Status}</span>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }
+  else if (tab === 'followup') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Post-Adoption Follow-up</h2><p>Monitor child wellbeing post-adoption</p></div>
+      <div class="app-list">
+        ${DB.POST_ADOPTION_FOLLOWUP.map(f=>`
+          <div class="app-item" style="flex-direction:column;align-items:flex-start">
+            <div style="display:flex;justify-content:space-between;width:100%;margin-bottom:12px">
+              <b>Follow-up Report #${f.Report_ID}</b>
+              <span class="app-status status-approved">${f.Overall_Status}</span>
+            </div>
+            <p style="font-size:13px;opacity:0.6;margin-bottom:16px">Date: ${f.FollowUp_Date}</p>
+            <div class="info-grid" style="width:100%">
+              <div class="info-item"><label>Child Adjustment</label><p style="font-size:14px;font-weight:400">${f.Child_Adjustment_Notes}</p></div>
+              <div class="info-item"><label>Parent Bonding</label><p style="font-size:14px;font-weight:400">${f.Parent_Bonding_Notes}</p></div>
+              <div class="info-item"><label>Concerns Flagged</label><p style="font-size:13px;color:${f.Concerns_Flagged==='None'?'var(--sage)':'var(--gold)'}">${f.Concerns_Flagged}</p></div>
+              <div class="info-item"><label>Next Follow-up</label><p style="font-size:14px;font-weight:400">${f.Next_FollowUp_Date||'TBD'}</p></div>
+            </div>
+          </div>`).join('')}
+        <button class="btn-hero-outline" style="margin-top:12px" onclick="openFollowupModal()">+ Add Follow-up Report</button>
+      </div>`;
+  }
+  else if (tab === 'children-notes') {
+    main.innerHTML = `
+      <div class="dash-header"><h2>Child Notes</h2><p>Update psychological and behavioral notes for each child</p></div>
+      <div class="app-list">
+        ${DB.CHILD.map(c=>`
+          <div class="app-item">
+            <div class="app-child-avatar" style="background:linear-gradient(135deg,${c.color}44,${c.color}88)">${c.emoji}</div>
+            <div class="app-info">
+              <h4>${c.Name}, Age ${c.Age}</h4>
+              <p style="font-size:13px;opacity:0.7;margin-top:4px">${(c.Personality_Traits||"").substring(0,100)}...</p>
+            </div>
+            <button class="btn-ghost" style="padding:6px 14px;font-size:12px;flex-shrink:0" onclick="openEditNotesModal(${c.Child_ID})">Edit Notes</button>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+function openHCRModal() {
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header"><h2>New Home Study Report</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>PAP</label><select id="hcr-pap">${DB.PAP.map(p=>`<option value="${p.PAP_ID}">${p.Names}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Visit Date</label><input type="date" id="hcr-date" value="${new Date().toISOString().split('T')[0]}"/></div>
+      <div class="form-group"><label>Home Environment Score (out of 10)</label><input type="text" id="hcr-score" placeholder="7.5/10"/></div>
+      <div class="form-group"><label>Psychologist Notes</label><textarea id="hcr-notes" placeholder="Observations about home environment, parent readiness..."></textarea></div>
+      <div class="form-group"><label>Approval Status</label><select id="hcr-status"><option>Approved</option><option>Pending</option><option>Rejected</option></select></div>
+      <button class="btn-submit" onclick="submitHCR()">Submit HCR</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function submitHCR() {
+  const notes = document.getElementById('hcr-notes').value;
+  if (!notes) { showToast('Please fill in notes', '⚠️'); return; }
+  DB.HCR.push({
+    HCR_ID: DB.HCR.length+1,
+    PAP_ID: parseInt(document.getElementById('hcr-pap').value),
+    Visit_Date: document.getElementById('hcr-date').value,
+    Home_Environment_Score: document.getElementById('hcr-score').value || '7/10',
+    Psychologist_Notes: notes,
+    Approval_Status: document.getElementById('hcr-status').value,
+  });
+  const counselorName = currentUser ? (currentUser.Name || 'Counselor') : 'Counselor';
+  dbLog(`HCR #${DB.HCR[DB.HCR.length-1].HCR_ID} submitted by ${counselorName} for PAP_ID ${document.getElementById('hcr-pap').value}`);
+  closeModal();
+  showToast('Home Study Report submitted!', '✅');
+  renderCounselorDash('hcr');
+}
+function openFollowupModal() {
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header"><h2>Post-Adoption Follow-up</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Follow-up Date</label><input type="date" id="fu-date" value="${new Date().toISOString().split('T')[0]}"/></div>
+      <div class="form-group"><label>Child Adjustment Notes</label><textarea id="fu-child" placeholder="How is the child settling in?"></textarea></div>
+      <div class="form-group"><label>Parent Bonding Notes</label><textarea id="fu-parent" placeholder="Observations about parent-child bond..."></textarea></div>
+      <button class="btn-submit" onclick="submitFollowup()">Submit Report</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function submitFollowup() {
+  const child = document.getElementById('fu-child').value;
+  const parent = document.getElementById('fu-parent').value;
+  if (!child || !parent) { showToast('Please fill all fields', '⚠️'); return; }
+  DB.POST_ADOPTION_FOLLOWUP.push({
+    Report_ID: DB.POST_ADOPTION_FOLLOWUP.length+1,
+    App_ID: null,
+    FollowUp_Date: document.getElementById('fu-date').value,
+    Child_Adjustment_Notes: child,
+    Parent_Bonding_Notes: parent,
+  });
+  const fuCounselor = currentUser ? (currentUser.Name || 'Counselor') : 'Counselor';
+  dbLog(`Follow-up Report #${DB.POST_ADOPTION_FOLLOWUP[DB.POST_ADOPTION_FOLLOWUP.length-1].Report_ID} submitted by ${fuCounselor}`);
+  closeModal();
+  showToast('Follow-up report submitted!', '✅');
+  renderCounselorDash('followup');
+}
+function openEditNotesModal(childId) {
+  const c = DB.CHILD.find(ch=>ch.Child_ID===childId);
+  if (!c) return;
+  document.getElementById('modal-content').innerHTML = `
+    <div class="modal-header"><h2>Edit Notes: ${c.Name}</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Personality Traits & Notes</label><textarea id="edit-notes" style="min-height:160px">${c.Personality_Traits}</textarea></div>
+      <div class="form-group"><label>Emotional Tag</label><input type="text" id="edit-tag" value="${c.emotionTag}"/></div>
+      <div class="form-group"><label>Special Needs</label><input type="text" id="edit-special" value="${c.Special_Needs||'None'}"/></div>
+      <button class="btn-submit" onclick="saveNotes(${childId})">Save Notes</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+function saveNotes(childId) {
+  const c = DB.CHILD.find(ch=>ch.Child_ID===childId);
+  c.Personality_Traits = document.getElementById('edit-notes').value;
+  c.emotionTag = document.getElementById('edit-tag').value;
+  const specEl = document.getElementById('edit-special'); if(specEl) c.Special_Needs = specEl.value;
+  const noteEditor = currentUser ? (currentUser.Name || 'Counselor') : 'Counselor';
+  dbLog(`Child notes updated for Child_ID ${childId} by ${noteEditor}`);
+  closeModal();
+  showToast('Notes updated successfully', '✅');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, icon='✅') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-icon').textContent = icon;
+  t.classList.remove('hidden');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.add('hidden'), 3500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // Demo login shortcuts
+  const demoBar = document.createElement('div');
+  demoBar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:var(--deep);color:white;padding:10px 24px;display:flex;align-items:center;gap:12px;z-index:900;font-size:13px;';
+  demoBar.innerHTML = `<span style="opacity:0.5;font-size:12px">Quick demo (auto-login):</span>
+    <button onclick="quickLogin('parent')" style="padding:6px 14px;border-radius:20px;background:var(--terracotta);color:white;border:none;cursor:pointer;font-size:11px;font-weight:600" title="ramesh.kumar@email.com">👨‍👩‍👧 Parent</button>
+    <button onclick="quickLogin('agency')" style="padding:6px 14px;border-radius:20px;background:var(--sage);color:white;border:none;cursor:pointer;font-size:11px;font-weight:600" title="muthu.selvam@shantibhavan.in">🏢 Agency</button>
+    <button onclick="quickLogin('counselor')" style="padding:6px 14px;border-radius:20px;background:var(--sky);color:white;border:none;cursor:pointer;font-size:11px;font-weight:600" title="meena.sub@counseling.in">🧑‍⚕️ Counselor</button>
+    <button onclick="showView('browse')" style="padding:6px 14px;border-radius:20px;background:var(--gold);color:white;border:none;cursor:pointer;font-size:11px;font-weight:600">🔍 Browse</button>
+    <span style="opacity:0.4;font-size:11px;margin-left:8px">Or sign in with any email from the database</span>`;
+  document.body.appendChild(demoBar);
+  document.body.style.paddingBottom = '48px';
+});
+function quickLogin(role) {
+  currentRole = role;
+  if (role === 'parent') {
+    currentUser = { ...DB.PAP[0], role: 'parent' };       // Ramesh and Preethi Kumar
+    showView('parent-dashboard');
+  } else if (role === 'agency') {
+    currentUser = { ...DB.AGENCY_STAFF[0], role: 'agency' }; // Muthu Selvam
+    showView('agency-dashboard');
+  } else {
+    currentUser = { ...DB.COUNSELOR[0], role: 'counselor' }; // Dr. Meena Subramaniam
+    showView('counselor-dashboard');
+  }
+}
+
+// ============================================================
+// STABLE COMPATIBILITY SCORE (deterministic, not random)
+// ============================================================
+function getCompatScore(c) {
+  const pap = getLoggedPAP();
+  let base = 55 + (c.Child_ID * 13 + 7) % 25;
+  if (pap) {
+    if (c.Age >= pap.Preferred_Age_Min && c.Age <= pap.Preferred_Age_Max) base += 15;
+    if (pap.Preferred_Gender === 'Any' || pap.Preferred_Gender === c.Gender) base += 8;
+    if (c.Is_Legally_Free) base += 5;
+    if (!c.Special_Needs || c.Special_Needs === 'None') base += 4;
+    if (pap.Can_Handle_Special_Needs && c.Special_Needs && c.Special_Needs !== 'None') base += 6;
+  } else {
+    base = 62 + (c.Child_ID * 7 + c.Child_ID * 3) % 28;
+  }
+  return Math.min(base, 97);
+}
+
+// ============================================================
+// DASH CHILDREN BROWSE (isolated from public browse)
+// ============================================================
+let dashFilter = 'all';
+function setDashFilter(f, el) {
+  dashFilter = f;
+  document.querySelectorAll('#dash-filter-btns .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderDashChildren();
+}
+function renderDashChildren() {
+  const query = (document.getElementById('dash-search-input')?.value || '').toLowerCase();
+  const children = DB.CHILD.filter(c => {
+    const mf = dashFilter === 'all' || (dashFilter === 'legal' && c.Is_Legally_Free) || getAgeGroup(c.Age) === dashFilter;
+    const mq = !query || c.Name.toLowerCase().includes(query) || c.interests.some(i => i.toLowerCase().includes(query)) || String(c.Age).includes(query);
+    return mf && mq;
+  });
+  const grid = document.getElementById('dash-children-grid');
+  if (!grid) return;
+  if (!children.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">🔍</div><p>No children found matching your search.</p></div>';
+    return;
+  }
+  const tagColors = ['', 'sage', 'sky', '', 'sage'];
+  grid.innerHTML = children.map(c => {
+    const score = getCompatScore(c);
+    const tagsHtml = c.interests.slice(0,3).map((t,i) => '<span class="tag ' + tagColors[i%tagColors.length] + '">' + t + '</span>').join('');
+    return '<div class="child-card" onclick="openChildModal(' + c.Child_ID + ')">' +
+      '<div class="child-avatar" style="background:linear-gradient(135deg,' + c.color + '44,' + c.color + '99)">' +
+        c.emoji +
+        (c.Is_Legally_Free ? '<span style="position:absolute;top:14px;right:14px;background:var(--sage);color:white;font-size:10px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:20px;text-transform:uppercase;">Legally Free</span>' : '') +
+      '</div>' +
+      '<div class="child-card-body">' +
+        '<div class="child-name">' + c.Name + '</div>' +
+        '<div class="child-meta">' + c.Age + ' years old · ' + c.Gender + ' · ' + getOrphanage(c.Orphanage_ID) + '</div>' +
+        '<div class="child-tags">' + tagsHtml + '</div>' +
+        '<div class="compatibility-bar"><span>Compatibility</span><div class="bar-track"><div class="bar-fill" style="width:' + score + '%"></div></div><span><b>' + score + '%</b></span></div>' +
+        '<button class="btn-view">View Profile & Apply</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ============================================================
+// DOCUMENT VIEWER
+// ============================================================
+function viewDocument(docId) {
+  const d = DB.LEGAL_DOCS.find(function(doc){ return doc.Doc_ID === docId; });
+  if (!d) return;
+  const app = DB.ADOPTION_APPLICATION.find(function(a){ return a.App_ID === d.App_ID; });
+  const child = app ? DB.CHILD.find(function(c){ return c.Child_ID === app.Child_ID; }) : null;
+  document.getElementById('modal-content').innerHTML =
+    '<div class="modal-header">' +
+      '<div><h2>' + d.Doc_Type + '</h2><p style="font-size:14px;opacity:0.55;margin-top:4px">Application #' + d.App_ID + (child ? ' · ' + child.Name : '') + '</p></div>' +
+      '<button class="modal-close" onclick="closeModal()">✕</button>' +
+    '</div>' +
+    '<div class="modal-body">' +
+      '<div style="background:linear-gradient(135deg,rgba(232,196,176,0.2),rgba(201,169,110,0.1));border-radius:16px;padding:40px;text-align:center;border:2px dashed var(--border);margin-bottom:24px">' +
+        '<div style="font-size:64px;margin-bottom:16px">📄</div>' +
+        '<h3 style="font-family:Cormorant Garamond,serif;font-size:24px;color:var(--deep);margin-bottom:8px">' + d.Doc_Type + '</h3>' +
+        '<p style="opacity:0.6;font-size:14px">Submitted for Application #' + d.App_ID + '</p>' +
+        (child ? '<p style="opacity:0.5;font-size:13px;margin-top:4px">Child: ' + child.Name + ', Age ' + child.Age + '</p>' : '') +
+      '</div>' +
+      '<div class="info-grid">' +
+        '<div class="info-item"><label>Document ID</label><p>#' + d.Doc_ID + '</p></div>' +
+        '<div class="info-item"><label>Application</label><p>App #' + d.App_ID + '</p></div>' +
+        '<div class="info-item"><label>Verification</label><p style="color:' + (d.Verification_Status==='Verified'?'var(--sage)':'var(--gold)') + ';">' + (d.Verification_Status === 'Verified' ? '✅ Verified' : '⏳ ' + d.Verification_Status) + '</p></div>' +
+        '<div class="info-item"><label>Document Type</label><p>' + d.Doc_Type + '</p></div>' +
+      '</div>' +
+      '<div style="background:rgba(122,158,126,0.08);border:1px solid rgba(122,158,126,0.2);border-radius:10px;padding:16px;margin-top:12px">' +
+        '<p style="font-size:13px;color:var(--sage);font-weight:500;">ℹ️ Document Viewer</p>' +
+        '<p style="font-size:13px;opacity:0.65;margin-top:4px;">In production, the uploaded document file would be displayed or downloaded here. This view shows verified document metadata.</p>' +
+      '</div>' +
+    '</div>';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+}
+
+// ============================================================
+// SEND MESSAGE (messages tab)
+// ============================================================
+function sendMessage() {
+  var input = document.getElementById('msg-input');
+  if (!input || !input.value.trim()) return;
+  var msg = input.value.trim();
+  input.value = '';
+  var row = document.getElementById('msg-input-row');
+  if (!row) return;
+  var container = row.parentElement;
+  var pap = getLoggedPAP() || DB.PAP[0];
+  var msgDiv = document.createElement('div');
+  msgDiv.style.cssText = 'padding:16px 20px;display:flex;gap:14px;align-items:flex-start;flex-direction:row-reverse;text-align:right';
+  msgDiv.innerHTML =
+    '<div style="width:36px;height:36px;border-radius:50%;background:var(--terracotta);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👩</div>' +
+    '<div style="max-width:420px">' +
+      '<p style="font-size:11px;opacity:0.5;margin-bottom:4px">You · Just now</p>' +
+      '<div style="background:var(--rust);color:white;padding:12px 16px;border-radius:12px;font-size:14px;line-height:1.6">' + msg + '</div>' +
+    '</div>';
+  container.insertBefore(msgDiv, row);
+  container.scrollTop = container.scrollHeight;
+  setTimeout(function() {
+    var replyDiv = document.createElement('div');
+    replyDiv.style.cssText = 'padding:16px 20px;display:flex;gap:14px;align-items:flex-start;';
+    var firstName = pap.Names ? pap.Names.split(' ')[0] : 'there';
+    replyDiv.innerHTML =
+      '<div style="width:36px;height:36px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🏢</div>' +
+      '<div style="max-width:420px">' +
+        '<p style="font-size:11px;opacity:0.5;margin-bottom:4px">Agency · Just now</p>' +
+        '<div style="background:rgba(196,122,90,0.1);color:var(--charcoal);padding:12px 16px;border-radius:12px;font-size:14px;line-height:1.6">Thank you for your message, ' + firstName + '. A staff member will respond within 24 hours. Reference: MSG-' + Date.now().toString().slice(-6) + '.</div>' +
+      '</div>';
+    container.insertBefore(replyDiv, row);
+    container.scrollTop = container.scrollHeight;
+  }, 1200);
+}
+
+// ============================================================
+// CHATBOT (AI-powered via Anthropic API)
+// ============================================================
+var chatbotOpen = false;
+var chatHistory = [];
+
+function toggleChatbot() {
+  chatbotOpen = !chatbotOpen;
+  var win = document.getElementById('chatbot-window');
+  var btn = document.getElementById('chatbot-btn');
+  if (chatbotOpen) {
+    win.classList.remove('hidden');
+    btn.textContent = '✕';
+    document.getElementById('chatbot-input').focus();
+  } else {
+    win.classList.add('hidden');
+    btn.textContent = '💬';
+  }
+}
+
+function addChatMsg(text, role) {
+  var msgs = document.getElementById('chatbot-messages');
+  var div = document.createElement('div');
+  div.className = 'cb-msg ' + role;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendChatMsg() {
+  var input = document.getElementById('chatbot-input');
+  var text = (input.value || '').trim();
+  if (!text) return;
+  input.value = '';
+
+  addChatMsg(text, 'user');
+  chatHistory.push({ role: 'user', content: text });
+
+  var typingDiv = addChatMsg('Thinking...', 'bot typing');
+
+  var legallyFree = DB.CHILD.filter(function(c){ return c.Is_Legally_Free; })
+    .map(function(c){ return c.Name + ' (age ' + c.Age + ', ' + c.Gender + ')'; }).join(', ');
+  var allChildren = DB.CHILD.map(function(c){ return c.Name + ' age ' + c.Age; }).join(', ');
+
+  var dbContext = 'You are the FamLink adoption platform assistant — warm, empathetic, and helpful. ' +
+    'You help prospective parents, agency staff, and counselors with adoption questions.\n\n' +
+    'Platform data:\n' +
+    '- ' + DB.CHILD.length + ' children in care: ' + allChildren + '\n' +
+    '- ' + DB.CHILD.filter(function(c){return c.Is_Legally_Free;}).length + ' legally free for adoption: ' + legallyFree + '\n' +
+    '- ' + DB.PAP.length + ' registered prospective parents, ' + DB.ORPHANAGE.length + ' partner orphanages\n\n' +
+    'Adoption process: (1) Create profile → (2) Home Study (HCR) → (3) Browse & match → (4) Apply → (5) Counselling → (6) Agency approval → (7) Welcome home.\n\n' +
+    'Eligibility: Must be Indian citizens, min age 25, financially stable, pass home study. Single parents eligible. Max age gap parent-child: 45 years.\n\n' +
+    'Be concise (2-4 sentences). Encourage registration. If asked about children, share names and ages.';
+
+  try {
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 350,
+        system: dbContext,
+        messages: chatHistory
+      })
+    });
+    var data = await response.json();
+    var reply = (data.content && data.content[0] && data.content[0].text)
+      ? data.content[0].text
+      : "I'm sorry, I couldn't process that. Please try again.";
+    typingDiv.remove();
+    addChatMsg(reply, 'bot');
+    chatHistory.push({ role: 'assistant', content: reply });
+    if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+  } catch(err) {
+    typingDiv.remove();
+    addChatMsg("I'm having trouble connecting right now. Please try again in a moment, or contact the agency directly.", 'bot');
+  }
+}
+
+async function loadChildrenFromDB() {
+  const res = await fetch("http://127.0.0.1:5000/children");
+  const data = await res.json();
+
+  console.log(data); // replace your static DB with this
+}
+
+async function doRegister() {
+  const data = {
+    name: document.querySelector("input[placeholder='Priya']").value,
+    email: document.querySelector("input[type='email']").value,
+    phone: document.querySelector("input[type='tel']").value,
+    occupation: document.getElementById("reg-occupation").value
+  };
+
+  const res = await fetch("http://127.0.0.1:5000/register", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+  alert(result.message);
+} 
+
+async function applyForChild(childId, papId) {
+  await fetch("http://127.0.0.1:5000/apply", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      child_id: childId,
+      pap_id: papId
+    })
+  });
+
+  alert("Application submitted!");
+}
+</script>
+
+<!-- ===== CHATBOT ===== -->
+<button id="chatbot-btn" onclick="toggleChatbot()" title="Ask FamLink Assistant">💬</button>
+<div id="chatbot-window" class="hidden">
+  <div class="chatbot-header">
+    <div>
+      <h4>FamLink Assistant</h4>
+      <p>Ask me anything about adoption</p>
+    </div>
+    <button class="chatbot-close" onclick="toggleChatbot()">✕</button>
+  </div>
+  <div id="chatbot-messages">
+    <div class="cb-msg bot">Hi! 👋 I'm the FamLink assistant. Ask me about the adoption process, children in our care, eligibility, or anything else — I'm here to help!</div>
+  </div>
+  <div class="chatbot-input-row">
+    <input id="chatbot-input" type="text" placeholder="Type your question..." onkeydown="if(event.key==='Enter')sendChatMsg()"/>
+    <button onclick="sendChatMsg()">➤</button>
+  </div>
+</div>
+
+</body>
+</html>
